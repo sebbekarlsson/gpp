@@ -1,5 +1,5 @@
-# WPP
-> Web PreProcessor
+# GPP
+> General PreProcessor
 > (Not implemented yet)
 
 ## Templating
@@ -46,7 +46,7 @@
 > To access the rest of the arguments, you can use `$1`, `$2`, `$3`, `$4`...
 > and so on...
 ### Functions
-> If you are familiar with the shell, functions in WPP will be easy for you.
+> If you are familiar with the shell, functions in GPP will be easy for you.
 > They follow the same pattern:
 ```bash
 <name-of-function> <arguments...>
