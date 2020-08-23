@@ -11,7 +11,7 @@
 > of a block of templating logic.
 #### (( , ))
 > The `((` and the `))` tokens are used to indicate the start `((` and the end `))`
-> of a ingored block.
+> of a ignored block.
 > And ignored block is something that is just treated as text by the preprocessor.
 > In other words, nothing within these tokens will be interpreted.
 > The entire document is by default wrapped in a ignored block.
