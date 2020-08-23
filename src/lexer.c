@@ -13,7 +13,7 @@ static char* charstr(char c)
     return new_str;
 }
 
-lexer_T* init_lexer(char* src)
+lexer_T* init_lexer(char* src, unsigned int eval)
 {
     lexer_T* lexer = (lexer_T*) calloc(1, sizeof(struct LEXER_STRUCT));
     lexer->src = (char*) calloc(strlen(src) + 1, sizeof(char));
@@ -21,7 +21,7 @@ lexer_T* init_lexer(char* src)
     lexer->i = 0;
     lexer->c = lexer->src[lexer->i];
     lexer->len = strlen(lexer->src);
-    lexer->state = LEXER_STATE_RAW;
+    lexer->eval = eval;
 
     return lexer;
 }
@@ -48,62 +48,19 @@ void lexer_skip_whitespace(lexer_T* lexer)
         lexer_advance(lexer);
 }
 
-token_T* lexer_parse_left_brace(lexer_T* lexer) {
-    lexer_advance(lexer);
-
-    if (lexer->c != '{')
-    {
-        printf("[Lexer]: Expected additional `{`\n");
-        exit(1);
-    }
-
-    lexer->state = LEXER_STATE_COMPUTABLE;
-
-    return init_token(charstr(lexer->c), TOKEN_TEMPLATE_BEGIN);
-}
-
-token_T* lexer_parse_right_brace(lexer_T* lexer) {
-    lexer_advance(lexer);
-
-    if (lexer->c != '}')
-    {
-        printf("[Lexer]: Expected additional `}\n`");
-        exit(1);
-    }
-
-    lexer->state = LEXER_STATE_RAW;
-
-    return init_token(charstr(lexer->c), TOKEN_TEMPLATE_END);
-}
-
 token_T* lexer_parse_left_paren(lexer_T* lexer) {
     lexer_advance(lexer);
 
     if (lexer->c != '(')
-        return init_token(charstr(lexer->c), TOKEN_LPAREN); 
+        return init_token(charstr(lexer->c), TOKEN_LPAREN);
 
-    lexer_advance(lexer);
-
-    char* value = (char*) calloc(1, sizeof(char));
-    value[0] = '\0';
-
-    do 
-    {
-        value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
-        strcat(value, charstr(lexer->c));
-        lexer_advance(lexer);
-    } while (lexer->c != ')');
-
-    return init_token(value, TOKEN_IGNORE_BEGIN);
+    return lexer_parse_raw(lexer);
 }
 
 token_T* lexer_parse_right_paren(lexer_T* lexer) {
     lexer_advance(lexer);
 
-    if (lexer->c != ')')
-        return init_token(charstr(lexer->c), TOKEN_RPAREN); 
-
-    return init_token(charstr(lexer->c), TOKEN_IGNORE_END);
+    return init_token(charstr(lexer->c), TOKEN_RPAREN); 
 }
 
 token_T* lexer_parse_id(lexer_T* lexer)
@@ -138,68 +95,153 @@ token_T* lexer_parse_string(lexer_T* lexer)
     return init_token(value, TOKEN_STRING);
 }
 
-token_T* lexer_next_token(lexer_T* lexer)
+static char* lexer_scrape(lexer_T* lexer, char cond_c, char cond_b, unsigned int close_i)
 {
+    char* value = (char*) calloc(1, sizeof(char));
+    value[0] = '\0';
+    unsigned int nr_closes = 0;
+
     while (lexer->c != '\0')
     {
-        if (lexer->state == LEXER_STATE_RAW && lexer->c != '\0')
+        if (cond_c)
         {
-            char* value = (char*) calloc(1, sizeof(char));
-            value[0] = '\0';
+            if (lexer->c == cond_c && lexer_peek(lexer, 1) == cond_c)
+                nr_closes += 1;
+        }
 
-            while (lexer->c != '\0') 
+        if (cond_b)
+        {
+            if (lexer->c == cond_b && lexer_peek(lexer, 1) == cond_b)
+                nr_closes += 1;
+        }
+
+        if (!close_i)
+        {
+            if (nr_closes)
+                break;
+        }
+
+        if (close_i)
+        {
+            if (nr_closes >= close_i)
+                break;
+        }
+
+        if (close_i && nr_closes == close_i-1)
+        {
+            if (cond_c)
             {
-                if ((lexer->c == '{' && lexer_peek(lexer) == '{') || (lexer->c == ')' && lexer_peek(lexer) == ')'))
-                {
-                    lexer->state = LEXER_STATE_COMPUTABLE;
-                    lexer_advance(lexer);
-                    lexer_advance(lexer);
-                    break;
-                }
-
-                value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
-                strcat(value, charstr(lexer->c)); 
-                
-                lexer_advance(lexer);
+                if (lexer->c == cond_c && lexer_peek(lexer, 1) == cond_c)
+                    continue;
             }
 
-            return init_token(value, TOKEN_RAW);
-        }
-
-        if (lexer->state == LEXER_STATE_COMPUTABLE && lexer->c != '\0')
-        {
-            while (lexer->c != '\0') 
-            { 
-               lexer_skip_whitespace(lexer);
-
-               if((lexer->c == '(' && lexer_peek(lexer) == '(') || (lexer->c == '}' && lexer_peek(lexer) == '}'))
-               {
-                   lexer->state = LEXER_STATE_RAW;
-                   lexer_advance(lexer);
-                   lexer_advance(lexer);
-                   break;
-               }
-               
-               if (lexer->c == '\0') break;
-
-               if (isalpha(lexer->c) || lexer->c == '@' || lexer->c == '$') return lexer_advance_token(lexer, lexer_parse_id(lexer));
-
-               switch (lexer->c)
-               {
-                   case '(': return lexer_parse_left_paren(lexer); break;
-                   case ')': return lexer_advance_token(lexer, lexer_parse_right_paren(lexer)); break;
-                   case '=': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_EQUALS)); break;
-                   case '"': return lexer_advance_token(lexer, lexer_parse_string(lexer)); break;
-                   default: printf("[Lexer]: Unexpected `%c`\n", lexer->c); exit(1); break;
-               } 
+            if (cond_b)
+            {
+                if (lexer->c == cond_b && lexer_peek(lexer, 1) == cond_b)
+                    continue;
             }
         }
+
+        value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
+        strcat(value, charstr(lexer->c));
+        lexer_advance(lexer); 
+    }
+
+
+    return value;
+}
+
+token_T* lexer_parse_raw(lexer_T* lexer)
+{
+    float close_i = 0;
+
+    while(lexer->c == '(')
+    {
+        close_i += 0.5f;
+        lexer_advance(lexer);
+        lexer_skip_whitespace(lexer);
+    }
+
+    token_T* tok = init_token(lexer_scrape(lexer, ')', '{', (int) close_i), TOKEN_RAW);
+
+    while (lexer->c == ')')
+    {
+        lexer_advance(lexer);
+        lexer_skip_whitespace(lexer);
+    }
+
+    return tok;
+}
+
+token_T* lexer_parse_comp(lexer_T* lexer)
+{
+    float close_i = 0;
+
+    while(lexer->c == '{')
+    {
+        close_i += 0.5f;
+        lexer_advance(lexer);
+        lexer_skip_whitespace(lexer);
+    }
+
+    token_T* tok = init_token(lexer_scrape(lexer, '}', 0, (int) close_i), TOKEN_COMP);
+
+    while(lexer->c == '}')
+    {
+        lexer_advance(lexer);
+        lexer_skip_whitespace(lexer);
+    }
+
+    return tok;
+}
+
+token_T* lexer_next_token_c(lexer_T* lexer)
+{
+    while (lexer->c != '\0' && lexer->c != '}' && lexer_peek(lexer, 1) != '}') 
+    { 
+       lexer_skip_whitespace(lexer);
+
+       if (lexer->c == '(' && lexer_peek(lexer, 1) == '(')
+           return lexer_parse_raw(lexer);
+
+       if (lexer->c == '\0') break;
+
+       if (isalpha(lexer->c) || lexer->c == '@' || lexer->c == '$') return lexer_advance_token(lexer, lexer_parse_id(lexer));
+
+       switch (lexer->c)
+       {
+           case '(': return lexer_parse_left_paren(lexer); break;
+           case ')': return lexer_advance_token(lexer, lexer_parse_right_paren(lexer)); break;
+           case '=': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_EQUALS)); break;
+           case '"': return lexer_advance_token(lexer, lexer_parse_string(lexer)); break;
+           case '[': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_LBRACKET)); break;
+           case ']': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_RBRACKET)); break;
+           default: printf("[Lexer]: Unexpected `%c`\n", lexer->c); exit(1); break;
+       } 
     }
 
     return init_token(charstr(lexer->c), TOKEN_EOF);
 }
 
-char lexer_peek(lexer_T* lexer)
+token_T* lexer_next_token(lexer_T* lexer)
 {
-    return lexer->i < lexer->len ? lexer->src[lexer->i + 1] : '\0';
+    while (lexer->c != '\0') 
+    {
+       if (lexer->eval)
+           return lexer_next_token_c(lexer);
+
+       if (lexer->c == '(' && lexer_peek(lexer, 1) == '(')
+           return lexer_parse_raw(lexer);
+       else if (lexer->c == '{' && lexer_peek(lexer, 1) == '{')
+           return lexer_parse_comp(lexer);
+       else
+           return lexer_parse_raw(lexer);
+    }
+
+    return init_token(charstr(lexer->c), TOKEN_EOF); 
+}
+
+char lexer_peek(lexer_T* lexer, unsigned int index)
+{
+    return lexer->i < lexer->len ? lexer->src[lexer->i + index] : '\0';
 }

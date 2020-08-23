@@ -18,10 +18,6 @@ const char* token_to_str(token_T* token)
     switch (token->type)
     {
         case TOKEN_EOF: return "TOKEN_EOF"; break;
-        case TOKEN_TEMPLATE_BEGIN: return "TOKEN_TEMPLATE_BEGIN"; break;
-        case TOKEN_TEMPLATE_END: return "TOKEN_TEMPLATE_END"; break;
-        case TOKEN_IGNORE_BEGIN: return "TOKEN_IGNORE_BEGIN"; break;
-        case TOKEN_IGNORE_END: return "TOKEN_IGNORE_END"; break;
         case TOKEN_COMMA: return "TOKEN_COMMA"; break;
         case TOKEN_LPAREN: return "TOKEN_LPAREN"; break;
         case TOKEN_RPAREN: return "TOKEN_RPAREN"; break;
@@ -29,6 +25,9 @@ const char* token_to_str(token_T* token)
         case TOKEN_ID: return "TOKEN_ID"; break;
         case TOKEN_STRING: return "TOKEN_STRING"; break;
         case TOKEN_RAW: return "TOKEN_RAW"; break;
+        case TOKEN_COMP: return "TOKEN_COMP"; break;
+        case TOKEN_LBRACKET: return "TOKEN_LBRACKET"; break;
+        case TOKEN_RBRACKET: return "TOKEN_RBRACKET"; break;
         default: return "TOKEN_NOT_STRINGABLE"; break;
     }
 }

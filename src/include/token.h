@@ -5,14 +5,13 @@ typedef struct TOKEN_STRUCT {
     enum
     {
         TOKEN_EOF,
-        TOKEN_TEMPLATE_BEGIN,
-        TOKEN_TEMPLATE_END,
-        TOKEN_IGNORE_BEGIN,
-        TOKEN_IGNORE_END,
+        TOKEN_COMP,
         TOKEN_RAW,
         TOKEN_COMMA,
         TOKEN_LPAREN,
         TOKEN_RPAREN,
+        TOKEN_LBRACKET,
+        TOKEN_RBRACKET,
         TOKEN_ID,
         TOKEN_EQUALS,
         TOKEN_STRING,

@@ -1,4 +1,5 @@
 #include "include/visitor.h"
+#include "include/main.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -30,15 +31,14 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node)
     switch (node->type)
     {
         case AST_ROOT: return visitor_visit_root(visitor, node); break;
-        case AST_TEMPLATE: return visitor_visit_template(visitor, node); break;
         case AST_RAW: return visitor_visit_raw(visitor, node); break;
+        case AST_COMP: return visitor_visit_comp(visitor, node); break;
         case AST_ASSIGN: return visitor_visit_assign(visitor, node); break;
         case AST_STRING: return visitor_visit_string(visitor, node); break;
         case AST_VAR: return visitor_visit_var(visitor, node); break;
         case AST_GROUP: return visitor_visit_group(visitor, node); break;
         default: printf("[Visitor]: Unhandled node of type `%d`\n", node->type); exit(1); break;
     }
-
     return init_ast(AST_NOOP);
 }
 
@@ -60,14 +60,15 @@ AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node)
     return node;
 }
 
-AST_T* visitor_visit_template(visitor_T* visitor, AST_T* node)
+AST_T* visitor_visit_comp(visitor_T* visitor, AST_T* node)
 {
-    AST_T* res = visitor_visit(visitor, node->template_value);
-
-    if (node->template_child != (void*) 0)
-        return visitor_visit(visitor, node->template_child);
-
-    return res;
+    if (node->comp_value)
+    {
+        gpp_result_T* res = gpp_eval(node->comp_value, 1);
+        return visitor_visit(visitor, res->node);
+    }
+    
+    return node;
 }
 
 AST_T* visitor_visit_assign(visitor_T* visitor, AST_T* node)
@@ -80,12 +81,7 @@ AST_T* visitor_visit_assign(visitor_T* visitor, AST_T* node)
 
     if (strcmp(node->var_name, "@") == 0)
     {
-        if (node->parent->template_var == (void*)0) {
-            printf("[Visitor.visit_assign]: Node parent has no template var.\n");
-            exit(1);
-        }
-
-        node->parent->template_var->var_value = visitor_visit(visitor, node->var_value);
+        // TODO: fix
     }
 
     return node;

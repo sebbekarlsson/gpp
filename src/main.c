@@ -1,10 +1,43 @@
+#include "include/main.h"
 #include "include/lexer.h"
 #include "include/parser.h"
 #include "include/visitor.h"
 #include "include/io.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+gpp_result_T* init_gpp_result(char* res, AST_T* node)
+{
+    gpp_result_T* result = (gpp_result_T*) calloc(1, sizeof(struct GPP_RESULT_STRUCT));
+    result->res = res;
+    result->node = node;
+
+    return result;
+}
+
+gpp_result_T* gpp_eval(char* source, unsigned int eval)
+{
+    lexer_T* lexer = init_lexer(source, eval);
+    parser_T* parser = init_parser(lexer);
+    AST_T* root = parser_parse(parser, (void*)0);
+    visitor_T* visitor = init_visitor();
+    visitor_visit(visitor, root);
+
+    char* res = 0;
+
+    if (visitor->buffer)
+    {
+        res = (char*) calloc(strlen(visitor->buffer) + 1, sizeof(char));
+        strcpy(res, visitor->buffer);
+    }
+
+    free(lexer);
+    free(visitor->buffer);
+    free(visitor);
+
+    return init_gpp_result(res, root);
+}
 
 int main(int argc, char* argv[])
 {
@@ -14,14 +47,9 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    lexer_T* lexer = init_lexer(gpp_read_file(argv[1]));
-    parser_T* parser = init_parser(lexer);
-    AST_T* root = parser_parse(parser, (void*)0);
-    visitor_T* visitor = init_visitor();
-    visitor_visit(visitor, root);
+    gpp_result_T* res = gpp_eval(gpp_read_file(argv[1]), 0);
 
-    printf("address of root node:\t%p\n", root);
     printf("--- START OF GENERATED OUTPUT ---\n");
-    printf("%s\n", visitor->buffer);
+    printf("%s\n", res->res);
     printf("--- END OF GENERATED OUTPUT ---\n");
 }

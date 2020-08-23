@@ -32,9 +32,6 @@ token_T* parser_eat(parser_T* parser, int type)
 AST_T* parser_parse(parser_T* parser, AST_T* parent) {
     AST_T* ast = init_ast(AST_ROOT);
 
-    ast->template_var = init_ast(AST_VAR);
-    ast->template_var->var_value = (void*)0;
-
     while (parser->token->type != TOKEN_EOF)
     {
         AST_T* item = parser_parse_expr(parser, ast);
@@ -64,10 +61,11 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
     switch (parser->token->type)
     {
         case TOKEN_RAW: ast = parser_parse_raw(parser, parent); break;
-        case TOKEN_TEMPLATE_BEGIN: ast = parser_parse_template(parser, parent); break;
+        case TOKEN_COMP: ast = parser_parse_comp(parser, parent); break;
         case TOKEN_ID: ast = parser_parse_id(parser, parent); break;
         case TOKEN_STRING: ast = parser_parse_string(parser, parent); break;
         case TOKEN_LPAREN: ast = parser_parse_group(parser, parent); break;
+        case TOKEN_LBRACKET: ast = parser_parse_group(parser, parent); break;
         default: printf("[Parser]: Unexpected `%s`\n", token_to_str(parser->token)); exit(1); break;
     }
 
@@ -96,18 +94,13 @@ AST_T* parser_parse_raw(parser_T* parser, AST_T* parent)
 }
 
 // TODO: implement
-AST_T* parser_parse_template(parser_T* parser, AST_T* parent)
+AST_T* parser_parse_comp(parser_T* parser, AST_T* parent)
 {
-    parser_eat(parser, TOKEN_TEMPLATE_BEGIN);
-    AST_T* ast = init_ast(AST_TEMPLATE);
-    ast->template_value = parser_parse(parser, ast);
-    parser_eat(parser, TOKEN_TEMPLATE_END);
-
-    ast->template_var = init_ast(AST_VAR);
-    ast->template_var->var_value = (void*)0;
-
-    if (parser->token->type != TOKEN_EOF)
-        ast->template_child = parser_parse(parser, parent);
+    char* value = parser->token->value;
+    parser_eat(parser, TOKEN_COMP);
+    AST_T* ast = init_ast(AST_COMP);
+    ast->comp_value = (char*) calloc(strlen(value) + 1, sizeof(char));
+    strcpy(ast->comp_value, value);
 
     return ast;
 }
@@ -153,11 +146,21 @@ AST_T* parser_parse_string(parser_T* parser, AST_T* parent)
 
 AST_T* parser_parse_group(parser_T* parser, AST_T* parent)
 {
-    parser_eat(parser, TOKEN_LPAREN);
+    unsigned int is_bracket = 0;
+
+    if (parser->token->type == TOKEN_LBRACKET)
+    {
+        parser_eat(parser, TOKEN_LBRACKET);
+        is_bracket = 1;
+    }
+    else
+    {
+        parser_eat(parser, TOKEN_LPAREN);
+    }
 
     AST_T* ast = init_ast(AST_GROUP);
     
-    while (parser->token->type != TOKEN_RPAREN)
+    while (parser->token->type != (is_bracket ? TOKEN_RBRACKET : TOKEN_RPAREN))
     {
         AST_T* item = parser_parse_expr(parser, parent);
 
@@ -175,7 +178,15 @@ AST_T* parser_parse_group(parser_T* parser, AST_T* parent)
         }
     }
 
-    parser_eat(parser, TOKEN_RPAREN);
+    if (is_bracket)
+    {
+        parser_eat(parser, TOKEN_RBRACKET);
+    }
+    else
+    {
+        parser_eat(parser, TOKEN_RPAREN);
+    }
+
 
     return ast;
 }

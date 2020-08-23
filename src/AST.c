@@ -9,10 +9,8 @@ AST_T* init_ast(int type)
 
     ast->ignore_value = 0;
     ast->raw_value = 0;
+    ast->comp_value = 0;
     ast->raw_child = 0;
-    ast->template_value = 0;
-    ast->template_child = 0;
-    ast->template_var = 0;
     ast->string_value = 0;
     ast->var_value = 0;
     ast->var_name = 0;
