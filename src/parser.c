@@ -32,9 +32,12 @@ token_T* parser_eat(parser_T* parser, int type)
 AST_T* parser_parse(parser_T* parser, AST_T* parent) {
     AST_T* ast = init_ast(AST_ROOT);
 
+    ast->template_var = init_ast(AST_VAR);
+    ast->template_var->var_value = (void*)0;
+
     while (parser->token->type != TOKEN_EOF)
     {
-        AST_T* item = parser_parse_expr(parser, parent);
+        AST_T* item = parser_parse_expr(parser, ast);
 
         ast->root_items_size += 1;
 

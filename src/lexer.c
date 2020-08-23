@@ -149,7 +149,7 @@ token_T* lexer_next_token(lexer_T* lexer)
 
             while (lexer->c != '\0') 
             {
-                if (lexer->c == '{' && lexer_peek(lexer) == '{')
+                if ((lexer->c == '{' && lexer_peek(lexer) == '{') || (lexer->c == ')' && lexer_peek(lexer) == ')'))
                 {
                     lexer->state = LEXER_STATE_COMPUTABLE;
                     lexer_advance(lexer);
