@@ -6,6 +6,12 @@ typedef struct LEXER_STRUCT {
     unsigned int len;
     char c;
     char* src;
+    
+    enum
+    {
+        LEXER_STATE_RAW,
+        LEXER_STATE_COMPUTABLE,
+    } state;
 } lexer_T;
 
 lexer_T* init_lexer(char* src);
@@ -26,4 +32,6 @@ token_T* lexer_parse_id(lexer_T* lexer);
 token_T* lexer_parse_string(lexer_T* lexer);
 
 token_T* lexer_next_token(lexer_T* lexer);
+
+char lexer_peek(lexer_T* lexer);
 #endif

@@ -9,6 +9,7 @@ typedef struct TOKEN_STRUCT {
         TOKEN_TEMPLATE_END,
         TOKEN_IGNORE_BEGIN,
         TOKEN_IGNORE_END,
+        TOKEN_RAW,
         TOKEN_COMMA,
         TOKEN_LPAREN,
         TOKEN_RPAREN,

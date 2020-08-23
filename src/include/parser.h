@@ -5,16 +5,23 @@
 typedef struct PARSER_STRUCT
 {
     token_T* token;
+    token_T* prev_token;
     lexer_T* lexer;
 } parser_T;
 
 parser_T* init_parser(lexer_T* lexer);
 
-AST_T* parser_parse(parser_T* parser);
+token_T* parser_eat(parser_T* parser, int type);
 
-AST_T* parser_parse_ignore(parser_T* parser);
+AST_T* parser_parse(parser_T* parser, AST_T* parent);
 
-AST_T* parser_parse_template(parser_T* parser);
+AST_T* parser_parse_raw(parser_T* parser, AST_T* parent);
 
-AST_T* parser_parse_assign(parser_T* parser);
+AST_T* parser_parse_template(parser_T* parser, AST_T* parent);
+
+AST_T* parser_parse_id(parser_T* parser, AST_T* parent);
+
+AST_T* parser_parse_assign(parser_T* parser, AST_T* parent);
+
+AST_T* parser_parse_string(parser_T* parser, AST_T* parent);
 #endif

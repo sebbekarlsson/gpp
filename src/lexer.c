@@ -21,6 +21,7 @@ lexer_T* init_lexer(char* src)
     lexer->i = 0;
     lexer->c = lexer->src[lexer->i];
     lexer->len = strlen(lexer->src);
+    lexer->state = LEXER_STATE_RAW;
 
     return lexer;
 }
@@ -56,6 +57,8 @@ token_T* lexer_parse_left_brace(lexer_T* lexer) {
         exit(1);
     }
 
+    lexer->state = LEXER_STATE_COMPUTABLE;
+
     return init_token(charstr(lexer->c), TOKEN_TEMPLATE_BEGIN);
 }
 
@@ -67,6 +70,8 @@ token_T* lexer_parse_right_brace(lexer_T* lexer) {
         printf("[Lexer]: Expected additional `}\n`");
         exit(1);
     }
+
+    lexer->state = LEXER_STATE_RAW;
 
     return init_token(charstr(lexer->c), TOKEN_TEMPLATE_END);
 }
@@ -132,8 +137,7 @@ token_T* lexer_parse_string(lexer_T* lexer)
     do 
     {
         value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
-        value[strlen(value)] = lexer->c;
-        value[strlen(value)+1] = '\0';
+        strcat(value, charstr(lexer->c));
         lexer_advance(lexer);
     } while (lexer->c != '\0' && lexer->c != '"');
     
@@ -142,8 +146,30 @@ token_T* lexer_parse_string(lexer_T* lexer)
 
 token_T* lexer_next_token(lexer_T* lexer)
 {
-    while (lexer->c != '\0') 
+    if (lexer->state == LEXER_STATE_RAW && lexer->c != '\0')
     {
+        char* value = (char*) calloc(1, sizeof(char));
+        value[0] = '\0';
+
+        while (lexer->c != '\0') 
+        { 
+            value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
+            strcat(value, charstr(lexer->c));
+            lexer_advance(lexer);
+
+            if (lexer->c == '{' && lexer_peek(lexer) == '{')
+            {
+                lexer->state = LEXER_STATE_COMPUTABLE;
+                break;
+            }
+        }
+
+        return init_token(value, TOKEN_RAW);
+    }
+
+    if (lexer->state == LEXER_STATE_COMPUTABLE && lexer->c != '\0')
+    while (lexer->c != '\0') 
+    { 
        lexer_skip_whitespace(lexer);
        
        if (lexer->c == '\0') break;
@@ -161,8 +187,19 @@ token_T* lexer_next_token(lexer_T* lexer)
            default: printf("[Lexer]: Unexpected `%c`\n", lexer->c); exit(1); break;
        }
 
-       lexer_advance(lexer); 
+       lexer_advance(lexer);
+
+       if(lexer->c == '(' && lexer_peek(lexer) == '(')
+       {
+           lexer->state = LEXER_STATE_RAW;
+           break;
+       }
     }
 
     return init_token(charstr(lexer->c), TOKEN_EOF);
+}
+
+char lexer_peek(lexer_T* lexer)
+{
+    return lexer->i < lexer->len ? lexer->src[lexer->i + 1] : '\0';
 }

@@ -28,6 +28,7 @@ const char* token_to_str(token_T* token)
         case TOKEN_EQUALS: return "TOKEN_EQUALS"; break;
         case TOKEN_ID: return "TOKEN_ID"; break;
         case TOKEN_STRING: return "TOKEN_STRING"; break;
+        case TOKEN_RAW: return "TOKEN_RAW"; break;
         default: return "TOKEN_NOT_STRINGABLE"; break;
     }
 }
