@@ -52,22 +52,17 @@ AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node)
 
 AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node)
 {
-    visitor_buffer(visitor, node->raw_value);
+    for (int i = 0; i < (int)node->group_items_size; i++)
+        visitor_buffer(visitor, ast_to_string(node->group_items[i]));
 
-    if (node->raw_child != (void*) 0)
-        return visitor_visit(visitor, node->raw_child);
-    
     return node;
 }
 
 AST_T* visitor_visit_comp(visitor_T* visitor, AST_T* node)
 {
-    if (node->comp_value)
-    {
-        gpp_result_T* res = gpp_eval(node->comp_value, 1);
-        return visitor_visit(visitor, res->node);
-    }
-    
+    for (int i = 0; i < (int)node->group_items_size; i++)
+        visitor_visit(visitor, node->group_items[i]);
+
     return node;
 }
 

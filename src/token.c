@@ -24,8 +24,10 @@ const char* token_to_str(token_T* token)
         case TOKEN_EQUALS: return "TOKEN_EQUALS"; break;
         case TOKEN_ID: return "TOKEN_ID"; break;
         case TOKEN_STRING: return "TOKEN_STRING"; break;
-        case TOKEN_RAW: return "TOKEN_RAW"; break;
-        case TOKEN_COMP: return "TOKEN_COMP"; break;
+        case TOKEN_RAW_BEGIN: return "TOKEN_RAW_BEGIN"; break;
+        case TOKEN_COMP_BEGIN: return "TOKEN_COMP_BEGIN"; break;
+        case TOKEN_RAW_END: return "TOKEN_RAW_END"; break;
+        case TOKEN_COMP_END: return "TOKEN_COMP_END"; break;
         case TOKEN_LBRACKET: return "TOKEN_LBRACKET"; break;
         case TOKEN_RBRACKET: return "TOKEN_RBRACKET"; break;
         default: return "TOKEN_NOT_STRINGABLE"; break;

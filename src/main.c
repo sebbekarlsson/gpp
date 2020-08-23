@@ -16,9 +16,9 @@ gpp_result_T* init_gpp_result(char* res, AST_T* node)
     return result;
 }
 
-gpp_result_T* gpp_eval(char* source, unsigned int eval)
+gpp_result_T* gpp_eval(char* source)
 {
-    lexer_T* lexer = init_lexer(source, eval);
+    lexer_T* lexer = init_lexer(source);
     parser_T* parser = init_parser(lexer);
     AST_T* root = parser_parse(parser, (void*)0);
     visitor_T* visitor = init_visitor();
@@ -47,9 +47,10 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    gpp_result_T* res = gpp_eval(gpp_read_file(argv[1]), 0);
+    gpp_result_T* res = gpp_eval(gpp_read_file(argv[1]));
 
     printf("--- START OF GENERATED OUTPUT ---\n");
-    printf("%s\n", res->res);
+    if (res->res)
+        printf("%s\n", res->res);
     printf("--- END OF GENERATED OUTPUT ---\n");
 }

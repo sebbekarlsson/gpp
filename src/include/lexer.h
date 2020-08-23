@@ -6,10 +6,9 @@ typedef struct LEXER_STRUCT {
     unsigned int len;
     char c;
     char* src;
-    unsigned int eval;
 } lexer_T;
 
-lexer_T* init_lexer(char* src, unsigned int eval);
+lexer_T* init_lexer(char* src);
 
 void lexer_advance(lexer_T* lexer);
 

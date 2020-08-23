@@ -24,7 +24,7 @@ token_T* parser_eat(parser_T* parser, int type)
     }
     else
     {
-        printf("[Parser.eat]: Unexpected `%s`\n", token_to_str(parser->token));
+        printf("[Parser.eat]: Unexpected `%s` `%s`\n", token_to_str(parser->token), parser->token->value);
         exit(1);
     }
 }
@@ -56,17 +56,20 @@ AST_T* parser_parse(parser_T* parser, AST_T* parent) {
 // TODO: implement
 AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
 {
+    if (parser->token->type == TOKEN_EOF)
+        return init_ast(AST_NOOP);
+
     AST_T* ast = (void*) 0;
 
     switch (parser->token->type)
     {
-        case TOKEN_RAW: ast = parser_parse_raw(parser, parent); break;
-        case TOKEN_COMP: ast = parser_parse_comp(parser, parent); break;
+        case TOKEN_RAW_BEGIN: ast = parser_parse_raw(parser, parent); break;
+        case TOKEN_COMP_BEGIN: ast = parser_parse_comp(parser, parent); break;
         case TOKEN_ID: ast = parser_parse_id(parser, parent); break;
         case TOKEN_STRING: ast = parser_parse_string(parser, parent); break;
         case TOKEN_LPAREN: ast = parser_parse_group(parser, parent); break;
         case TOKEN_LBRACKET: ast = parser_parse_group(parser, parent); break;
-        default: printf("[Parser]: Unexpected `%s`\n", token_to_str(parser->token)); exit(1); break;
+        default: if (parser->token->type != TOKEN_EOF ) { printf("[Parser]: Unexpected `%s`\n", token_to_str(parser->token)); exit(1); } break;
     }
 
     if (ast != (void*) 0)
@@ -81,14 +84,29 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
 // TODO: implement
 AST_T* parser_parse_raw(parser_T* parser, AST_T* parent)
 {
-    char* value = parser->token->value;
-    parser_eat(parser, TOKEN_RAW);
+    parser_eat(parser, TOKEN_RAW_BEGIN);
+    
     AST_T* ast = init_ast(AST_RAW);
-    ast->raw_value = (char*) calloc(strlen(value) + 1, sizeof(char));
-    strcpy(ast->raw_value, value);
 
-    if (parser->token->type != TOKEN_EOF)
-        ast->raw_child = parser_parse(parser, parent);
+    while (parser->token->type != TOKEN_RAW_END && parser->token->type != TOKEN_EOF)
+    {
+        AST_T* item = parser_parse_expr(parser, parent);
+
+        ast->group_items_size += 1;
+
+        if (ast->group_items == (void*) 0)
+        {
+            ast->group_items = calloc(ast->group_items_size, sizeof(struct AST_STRUCT*));
+            ast->group_items[ast->group_items_size-1] = item;
+        }
+        else
+        {
+            ast->group_items = realloc(ast->group_items, sizeof(struct AST_STRUCT*) * ast->group_items_size);
+            ast->group_items[ast->group_items_size-1] = item;
+        }
+    }
+
+    parser_eat(parser, TOKEN_RAW_END);
 
     return ast;
 }
@@ -96,11 +114,29 @@ AST_T* parser_parse_raw(parser_T* parser, AST_T* parent)
 // TODO: implement
 AST_T* parser_parse_comp(parser_T* parser, AST_T* parent)
 {
-    char* value = parser->token->value;
-    parser_eat(parser, TOKEN_COMP);
+    parser_eat(parser, TOKEN_COMP_BEGIN);
+
     AST_T* ast = init_ast(AST_COMP);
-    ast->comp_value = (char*) calloc(strlen(value) + 1, sizeof(char));
-    strcpy(ast->comp_value, value);
+
+    while (parser->token->type != TOKEN_COMP_END && parser->token->type != TOKEN_EOF)
+    {
+        AST_T* item = parser_parse_expr(parser, ast);
+
+        ast->group_items_size += 1;
+
+        if (ast->group_items == (void*) 0)
+        {
+            ast->group_items = calloc(ast->group_items_size, sizeof(struct AST_STRUCT*));
+            ast->group_items[ast->group_items_size-1] = item;
+        }
+        else
+        {
+            ast->group_items = realloc(ast->group_items, sizeof(struct AST_STRUCT*) * ast->group_items_size);
+            ast->group_items[ast->group_items_size-1] = item;
+        }
+    }
+
+    parser_eat(parser, TOKEN_COMP_END);
 
     return ast;
 }

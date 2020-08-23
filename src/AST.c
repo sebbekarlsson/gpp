@@ -30,6 +30,14 @@ static char* ast_string_to_string(AST_T* ast)
     return value;
 }
 
+static char* ast_var_to_string(AST_T* ast)
+{
+    char* value = (char*) calloc(strlen(ast->var_name) + 1, sizeof(char));
+    strcpy(value, ast->var_name);
+
+    return value;
+}
+
 static char* ast_default_to_string(AST_T* ast)
 {
     const char* template = "COULD_CONVERT_TO_STRING";
@@ -44,6 +52,7 @@ char* ast_to_string(AST_T* ast)
     switch (ast->type)
     {
         case AST_STRING: return ast_string_to_string(ast); break;
+        case AST_VAR: return ast_var_to_string(ast); break;
         default: return ast_default_to_string(ast); break;
     }
 }
