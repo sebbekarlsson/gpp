@@ -29,8 +29,32 @@ token_T* parser_eat(parser_T* parser, int type)
     }
 }
 
+AST_T* parser_parse(parser_T* parser, AST_T* parent) {
+    AST_T* ast = init_ast(AST_ROOT);
+
+    while (parser->token->type != TOKEN_EOF)
+    {
+        AST_T* item = parser_parse_expr(parser, parent);
+
+        ast->root_items_size += 1;
+
+        if (ast->root_items == (void*) 0)
+        {
+            ast->root_items = calloc(1, sizeof(struct AST_STRUCT*));
+            ast->root_items[0] = item;
+        }
+        else
+        {
+            ast->root_items = realloc(ast->root_items, sizeof(struct AST_STRUCT*) * ast->root_items_size);
+            ast->root_items[ast->root_items_size-1] = item;
+        }
+    }
+
+    return ast;
+}
+
 // TODO: implement
-AST_T* parser_parse(parser_T* parser, AST_T* parent)
+AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
 {
     AST_T* ast = (void*) 0;
 
@@ -40,7 +64,8 @@ AST_T* parser_parse(parser_T* parser, AST_T* parent)
         case TOKEN_TEMPLATE_BEGIN: ast = parser_parse_template(parser, parent); break;
         case TOKEN_ID: ast = parser_parse_id(parser, parent); break;
         case TOKEN_STRING: ast = parser_parse_string(parser, parent); break;
-        default: printf("[Parser]: Unexpected `%s`\n", token_to_str(parser->token));
+        case TOKEN_LPAREN: ast = parser_parse_group(parser, parent); break;
+        default: printf("[Parser]: Unexpected `%s`\n", token_to_str(parser->token)); exit(1); break;
     }
 
     if (ast != (void*) 0)
@@ -106,7 +131,7 @@ AST_T* parser_parse_assign(parser_T* parser, AST_T* parent)
     strcpy(varname, parser->prev_token->value);
     parser_eat(parser, TOKEN_EQUALS);
     AST_T* ast = init_ast(AST_ASSIGN);
-    ast->var_value = parser_parse(parser, parent);
+    ast->var_value = parser_parse_expr(parser, parent);
     ast->var_name = varname;
 
     return ast;
@@ -119,6 +144,35 @@ AST_T* parser_parse_string(parser_T* parser, AST_T* parent)
 
     AST_T* ast = init_ast(AST_STRING);
     ast->string_value = value;
+
+    return ast;
+}
+
+AST_T* parser_parse_group(parser_T* parser, AST_T* parent)
+{
+    parser_eat(parser, TOKEN_LPAREN);
+
+    AST_T* ast = init_ast(AST_GROUP);
+    
+    while (parser->token->type != TOKEN_RPAREN)
+    {
+        AST_T* item = parser_parse_expr(parser, parent);
+
+        ast->group_items_size += 1;
+
+        if (ast->group_items == (void*) 0)
+        {
+            ast->group_items = calloc(1, sizeof(struct AST_STRUCT*));
+            ast->group_items[0] = item;
+        }
+        else
+        {
+            ast->group_items = realloc(ast->group_items, sizeof(struct AST_STRUCT*) * ast->group_items_size);
+            ast->group_items[ast->group_items_size-1] = item;
+        }
+    }
+
+    parser_eat(parser, TOKEN_RPAREN);
 
     return ast;
 }

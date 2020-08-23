@@ -18,6 +18,9 @@ AST_T* init_ast(int type)
     ast->var_name = 0;
     ast->parent = 0;
 
+    ast->group_items = (void*) 0;
+    ast->group_items_size = 0;
+
     return ast;
 }
 

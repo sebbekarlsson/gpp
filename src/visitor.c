@@ -29,15 +29,25 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node)
 {
     switch (node->type)
     {
+        case AST_ROOT: return visitor_visit_root(visitor, node); break;
         case AST_TEMPLATE: return visitor_visit_template(visitor, node); break;
         case AST_RAW: return visitor_visit_raw(visitor, node); break;
         case AST_ASSIGN: return visitor_visit_assign(visitor, node); break;
         case AST_STRING: return visitor_visit_string(visitor, node); break;
         case AST_VAR: return visitor_visit_var(visitor, node); break;
+        case AST_GROUP: return visitor_visit_group(visitor, node); break;
         default: printf("[Visitor]: Unhandled node of type `%d`\n", node->type); exit(1); break;
     }
 
     return init_ast(AST_NOOP);
+}
+
+AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node)
+{
+    for (int i = 0; i < (int)node->root_items_size; i++)
+        visitor_visit(visitor, node->root_items[i]);
+
+    return node;
 }
 
 AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node)
@@ -97,4 +107,14 @@ AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node)
     }
 
     return visitor_visit(visitor, node->var_value);
+}
+
+AST_T* visitor_visit_group(visitor_T* visitor, AST_T* node)
+{
+    for (int i = 0; i < (int) node->group_items_size; i++)
+    {
+        visitor_visit(visitor, node->group_items[i]);
+    }
+
+    return node;
 }
