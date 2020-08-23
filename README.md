@@ -49,10 +49,11 @@
 > If you are familiar with the shell, functions in GPP will be easy for you.
 > They follow the same pattern:
 ```bash
-<name-of-function> <arguments...>
+<name-of-function> ( <arguments...> )
 ```
 > In other words, you start by typing the name of the function,
 > and then you give it a list of arguments separated by space (` `).
+> The arguments needs to be wrapped in parentheses however.
 ### Practical Example
 > Below is an example where we are mapping a list of names ( a list of strings )
 > to `<li>` elements within a `<ul>` tag.
@@ -61,14 +62,13 @@
     <head>
     </head>
     <body>
-        {{
-            @ = Σ names
-            ((
-                <ul>
-                    <li>{{ @ = $ }}</li>
-                </ul>
-            ))
-        }}
+       <ul>
+            {{
+                @ = Σ(
+                    names ( <li>{{ @ = $ }}</li> )
+                )
+            }}
+       </ul>
     </body>
 </html>
 ```

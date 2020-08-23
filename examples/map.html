@@ -2,13 +2,12 @@
     <head>
     </head>
     <body>
-        {{
-            @ = Σ names
-            ((
-                <ul>
-                    <li>{{ @ = $ }}</li>
-                </ul>
-            ))
-        }}
+       <ul>
+            {{
+                @ = Σ(
+                    names ( <li>{{ @ = $ }}</li> )
+                )
+            }}
+       </ul>
     </body>
 </html>
