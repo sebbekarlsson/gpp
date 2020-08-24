@@ -18,6 +18,7 @@ typedef struct TOKEN_STRUCT {
         TOKEN_ID,
         TOKEN_EQUALS,
         TOKEN_STRING,
+        TOKEN_COMMENT,
     } type;
 } token_T;
 #endif

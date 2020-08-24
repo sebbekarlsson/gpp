@@ -95,12 +95,34 @@ token_T* lexer_parse_string(lexer_T* lexer)
     return init_token(value, TOKEN_STRING);
 }
 
+token_T* lexer_parse_comment(lexer_T* lexer)
+{
+    lexer_advance(lexer);
+
+    if (lexer->c == '!')
+        lexer_advance(lexer);
+
+    char* value = (char*) calloc(1, sizeof(char));
+    value[0] = '\0';
+
+    do 
+    {
+        value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
+        strcat(value, charstr(lexer->c));
+        lexer_advance(lexer);
+    } while (lexer->c != '\0' && lexer->c != '\n' && lexer->c != 10);
+
+    return init_token(value, TOKEN_COMMENT);
+}
+
 token_T* lexer_parse_any(lexer_T* lexer)
 {
     char* value = (char*) calloc(1, sizeof(char));
     value[0] = '\0';
 
-    while (lexer->c != '\0' && !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == '(' && lexer_peek(lexer, 1) == '(')) 
+    while (
+        lexer->c != '\0' && lexer->c != '#' &&
+       !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == '(' && lexer_peek(lexer, 1) == '('))
     {
         if((lexer->c == ')' && lexer_peek(lexer, 1) == ')'))
         {
@@ -180,6 +202,9 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
         if ((lexer->c == '{' && lexer_peek(lexer, 1) == '{'))
                break;
 
+        if (lexer->c == '#')
+            break;
+
        if (!all)
        {
            open_count += (lexer->c == '(' && lexer_peek(lexer, 1) == '(');
@@ -241,22 +266,19 @@ token_T* lexer_next_token(lexer_T* lexer)
     while (lexer->c != '\0') 
     {
         while(lexer->c == '{' && lexer_peek(lexer, 1) == '{')
-       {
            return lexer_parse_comp_begin(lexer); 
-       }
 
-       if (!lexer->comp && !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == '(' && lexer_peek(lexer, 1) == '('))
-       {
+       if (
+           !lexer->comp && lexer->c != '#' &&
+           !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == '(' && lexer_peek(lexer, 1) == '(')
+       )
            return lexer_parse_any(lexer);
-       }
        
        if (lexer->comp)
            lexer_skip_whitespace(lexer);
 
        while (lexer->c == '}' && lexer_peek(lexer, 1) == '}')
-       {
            return lexer_parse_comp_end(lexer);
-       }
        
        if (lexer->c == '(' && lexer_peek(lexer, 1) == '(')
            return lexer_parse_raw(lexer, 0); 
@@ -273,6 +295,7 @@ token_T* lexer_next_token(lexer_T* lexer)
            case '"': return lexer_advance_token(lexer, lexer_parse_string(lexer)); break;
            case '[': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_LBRACKET)); break;
            case ']': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_RBRACKET)); break;
+           case '#': return lexer_parse_comment(lexer); break;
            default: return lexer_parse_raw(lexer, 1); break;
        } 
     }

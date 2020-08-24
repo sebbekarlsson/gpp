@@ -1,6 +1,7 @@
 #include "include/AST.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
 AST_T* init_ast(int type)
 {
@@ -19,6 +20,8 @@ AST_T* init_ast(int type)
     ast->group_items = (void*) 0;
     ast->group_items_size = 0;
     ast->result = 0;
+    ast->interpreter_path = 0;
+    ast->comment_value = 0;
 
     ast->buffered = 0;
 
@@ -41,11 +44,19 @@ static char* ast_var_to_string(AST_T* ast)
     return value;
 }
 
+static char* ast_comment_to_string(AST_T* ast)
+{
+    char* value = (char*) calloc(strlen(ast->comment_value) + 1, sizeof(char));
+    strcpy(value, ast->comment_value);
+
+    return value;
+}
+
 static char* ast_default_to_string(AST_T* ast)
 {
-    const char* template = "COULD_CONVERT_TO_STRING";
-    char* val = calloc(strlen(template) + 1, sizeof(char));
-    strcpy(val, template);
+    const char* template = "COULD_CONVERT_TO_STRING %d";
+    char* val = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(val, template, ast->type);
 
     return val;
 }
@@ -56,6 +67,7 @@ char* ast_to_string(AST_T* ast)
     {
         case AST_STRING: return ast_string_to_string(ast); break;
         case AST_VAR: return ast_var_to_string(ast); break;
+        case AST_COMMENT: return ast_comment_to_string(ast); break;
         default: return ast_default_to_string(ast); break;
     }
 }

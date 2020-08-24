@@ -70,6 +70,7 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
         case TOKEN_STRING: ast = parser_parse_string(parser, parent); break;
         case TOKEN_LPAREN: ast = parser_parse_group(parser, parent); break;
         case TOKEN_LBRACKET: ast = parser_parse_group(parser, parent); break;
+        case TOKEN_COMMENT: ast = parser_parse_comment(parser, parent); break;
         default: if (parser->token->type != TOKEN_EOF ) { printf("[Parser]: Unexpected `%s` `%s`\n", token_to_str(parser->token), parser->token->value); exit(1); } break;
     }
 
@@ -164,6 +165,17 @@ AST_T* parser_parse_string(parser_T* parser, AST_T* parent)
 
     AST_T* ast = init_ast(AST_STRING);
     ast->string_value = value;
+
+    return ast;
+}
+
+AST_T* parser_parse_comment(parser_T* parser, AST_T* parent)
+{
+    char* value = parser->token->value;
+    parser_eat(parser, TOKEN_COMMENT);
+
+    AST_T* ast = init_ast(AST_COMMENT);
+    ast->comment_value = value;
 
     return ast;
 }

@@ -4,6 +4,36 @@
 #include <string.h>
 #include <stdlib.h>
 
+static char* sh(char* binpath, char* source)
+{
+  char* output = (char*) calloc(1, sizeof(char));
+  output[0] = '\0';
+
+  FILE *fp;
+  char path[1035];
+
+  char* cmd_template = "%s <<EOF\n%s\nEOF";
+  char* cmd = (char*) calloc(strlen(cmd_template) + strlen(binpath) + strlen(source) + 128, sizeof(char));
+  sprintf(cmd, cmd_template, binpath, source);
+
+  fp = popen(cmd, "r");
+  if (fp == NULL) {
+    printf("Failed to run command\n" );
+    exit(1);
+  }
+
+  while (fgets(path, sizeof(path), fp) != NULL) {
+    output = (char*) realloc(output, (strlen(output) + strlen(path) + 1) * sizeof(char));
+    strcat(output, path);
+  }
+
+  pclose(fp);
+
+  free(cmd);
+
+  return output;
+}
+
 visitor_T* init_visitor()
 {
     visitor_T* visitor = (visitor_T*) calloc(1, sizeof(struct VISITOR_STRUCT));
@@ -37,6 +67,7 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node)
         case AST_STRING: return visitor_visit_string(visitor, node); break;
         case AST_VAR: return visitor_visit_var(visitor, node); break;
         case AST_GROUP: return visitor_visit_group(visitor, node); break;
+        case AST_COMMENT: return init_ast(AST_NOOP); break;
         default: printf("[Visitor]: Unhandled node of type `%d`\n", node->type); exit(1); break;
     }
     return init_ast(AST_NOOP);
@@ -54,6 +85,29 @@ AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node)
 {
     if (node->result)
     {
+        if (node->raw_child)
+        {
+            if (node->raw_child->type == AST_ROOT)
+            {
+                AST_T* comment = (void*)0;
+
+                if (node->raw_child->root_items_size > 0)
+                {
+                    AST_T* first = node->raw_child->root_items[0];
+
+                    comment = first->type == AST_COMMENT ? first : (void*)0;
+                }
+
+                if (comment)
+                {
+                    char* value = sh(comment->comment_value, node->result);
+                    visitor_buffer(visitor, value);
+                    free(value);
+                    return node;
+                }
+            }
+        }
+
         visitor_buffer(visitor, node->result);
         return node->raw_child;
     }

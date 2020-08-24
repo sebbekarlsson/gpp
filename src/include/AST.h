@@ -13,12 +13,15 @@ typedef struct AST_STRUCT {
         AST_VAR,
         AST_GROUP,
         AST_ROOT,
+        AST_COMMENT,
     } type;
 
     char* ignore_value;
     char* raw_value;
     char* comp_value;
     struct AST_STRUCT* raw_child;
+    char* interpreter_path;
+    char* comment_value;
     struct AST_STRUCT* var_value;
     struct AST_STRUCT* parent;
     char* string_value;
