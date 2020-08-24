@@ -13,27 +13,27 @@
     <body>
         <h1>{{ "My Headline" }}</h1>
          <p>{{ "It works" }}</p>
-         <p>((It sure {{ "does" }}))</p>
-         <span>((
+         <p>(@It sure {{ "does" }}@)</p>
+         <span>(@
          Here is some text that will be completely ignored.   
          This: <b>{{ "Is not ignored however" }}</b>.
-         ))</span>
+         @)</span>
          <ul>
             {{
                 (
-                    ((<li>Here is a item</li>))
-                    ((<li>Another item</li>))
+                    (@<li>Here is a item</li>@)
+                    (@<li>Another item</li>@)
                 )
             }}
          </ul>
-((#!/usr/bin/python
+(@#!/usr/bin/python
 for i in range(100):
-    x = """((
+    x = """(@
         <div>
             {}     
         </div>
-    ))""".format(i)
+    @)""".format(i)
     print(x)
- ))
+ @)
     </body>
 </html>

@@ -122,9 +122,9 @@ token_T* lexer_parse_any(lexer_T* lexer)
 
     while (
         lexer->c != '\0' && lexer->c != '#' &&
-       !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == '(' && lexer_peek(lexer, 1) == '('))
+       !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1))
     {
-        if((lexer->c == ')' && lexer_peek(lexer, 1) == ')'))
+        if((lexer->c == VFE0 && lexer_peek(lexer, 1) == VFE1))
         {
             lexer_advance(lexer);
             lexer_advance(lexer);
@@ -193,8 +193,8 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
 
     char* value = (char*) calloc(1, sizeof(char));
     value[0] = '\0';
-    open_count += (lexer->c == '(' && lexer_peek(lexer, 1) == '(');
-    close_count += (lexer->c == ')' && lexer_peek(lexer, 1) == ')');
+    open_count += (lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1);
+    close_count += (lexer->c == VFE0 && lexer_peek(lexer, 1) == VFE1);
     lcount += (lexer->c == '(');
     
     while (lexer->c != '\0')
@@ -207,8 +207,8 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
 
        if (!all)
        {
-           open_count += (lexer->c == '(' && lexer_peek(lexer, 1) == '(');
-           close_count += (lexer->c == ')' && lexer_peek(lexer, 1) == ')'); 
+           open_count += (lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1);
+           close_count += (lexer->c == VFE0 && lexer_peek(lexer, 1) == VFE1); 
            
            if ((close_count >= open_count) && open_count > 0)
                break;
@@ -223,7 +223,7 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
                    shift = 1;
                }
 
-               if ((close_count + (lexer->c == ')' && lexer_peek(lexer, 1) == ')') >= open_count))
+               if ((close_count + (lexer->c == VFE0 && lexer_peek(lexer, 1) == VFE1) >= open_count))
                {
                    break;
                }
@@ -232,7 +232,7 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
                strcat(value, charstr(lexer->c));
            }
            
-           lcount += (lexer->c == '(');
+           lcount += (lexer->c == VFB0);
            
            lexer_advance(lexer);
        } else {
@@ -244,12 +244,12 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
 
     lexer_skip_whitespace(lexer);
 
-    if (lexer->c == ')')
+    if (lexer->c == VFE0 || lexer->c == VFE1)
     {
         lexer_advance(lexer);
         lexer_skip_whitespace(lexer);
     }
-    if (lexer->c == ')')
+    if (lexer->c == VFE0 || lexer->c == VFE1)
     {
         lexer_advance(lexer);
         lexer_skip_whitespace(lexer);
@@ -270,7 +270,7 @@ token_T* lexer_next_token(lexer_T* lexer)
 
        if (
            !lexer->comp && lexer->c != '#' &&
-           !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == '(' && lexer_peek(lexer, 1) == '(')
+           !(lexer->c == '{' && lexer_peek(lexer, 1) == '{') && !(lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1)
        )
            return lexer_parse_any(lexer);
        
@@ -280,7 +280,7 @@ token_T* lexer_next_token(lexer_T* lexer)
        while (lexer->c == '}' && lexer_peek(lexer, 1) == '}')
            return lexer_parse_comp_end(lexer);
        
-       if (lexer->c == '(' && lexer_peek(lexer, 1) == '(')
+       if (lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1)
            return lexer_parse_raw(lexer, 0); 
 
        if (lexer->c == '\0') break;
