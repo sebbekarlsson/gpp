@@ -1,6 +1,34 @@
 # GPP
 > General PreProcessor
 
+```html
+<html>
+    <body>
+        <h2>I really want this list to be rendered using Python!</h2>
+        <ul>
+((#!/usr/bin/python
+for name in ["john", "sarah", "anna"]:
+    x = """((
+        <li>
+            {}     
+        </li>
+    ))""".format(name)
+    print(x)
+ ))
+        </ul>
+
+        <h2>I do want this list to be rendered in Node.js though</h2>
+        <ul>
+((#!/usr/bin/node
+const result = ["john", "sarah", "anna"].map(name => "<li>" + name +  "</li>");
+const html = result.join('\n');
+console.log(html);
+))
+        </ul>
+    </body>
+</html>
+```
+
 ## Templating
 ### The basics
 > There are a few important tokens in the templating language,
