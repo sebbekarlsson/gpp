@@ -1,6 +1,5 @@
 # GPP
 > General PreProcessor
-> (Not implemented yet)
 
 ## Templating
 ### The basics
@@ -15,70 +14,83 @@
 > And ignored block is something that is just treated as text by the preprocessor.
 > In other words, nothing within these tokens will be interpreted.
 > The entire document is by default wrapped in a ignored block.
-#### @
-> The `@` (at sign) is a variable that is instantiated within every `{{` , `}}` block.
-> Each block has their own unique `@` (at sign) variable.
-> This at sign contains the content of what the `{{`, `}}` block will be equal to.
-> In other words, whatever is in the `@` (at sign) will be what is finally rendered
-> inside the `{{` , `}}` block.
-> This `@` variable is both fully readable and fully writable.
-> For example, the source below:
+##### One Exception
+> There is one exception to the `(( ))` (ignore block) however,
+> if you specify a path to an interpreter, the rest of the content will be
+> interpreted. _(There is an example further down in this document)_
+
+#### How the blocks work
+> The following:  
 ```html
-<p>{{ @ = "hello" }}</p>
+<p>{{ "hello" }}</p>
 ```
 > Will be rendered as:
 ```html
 <p>hello</p>
 ```
-> And as mentioned, this `@` variable can be modified however you want:
+> The following:  
 ```html
-<p>{{ @ = concat "hello" " world" }}</p>
+<p>(( "hello" ))</p>
 ```
-> This will be rendered as:
+> Will be rendered as:
 ```html
-<p>hello world</p>
+<p> "hello" </p>
 ```
-#### $
-> The `$` (dollar sign) is a variable that is automatically exposed within functional
-> body scopes.
-> In other words, the `$` (dollar sign) is equal to the first argument a function takes in.
-> There is also another alias for the first argument in the function, which is `$0`.
-> To access the rest of the arguments, you can use `$1`, `$2`, `$3`, `$4`...
-> and so on...
-### Functions
-> If you are familiar with the shell, functions in GPP will be easy for you.
-> They follow the same pattern:
-```bash
-<name-of-function> ( <arguments...> )
-```
-> In other words, you start by typing the name of the function,
-> and then you give it a list of arguments separated by space (` `).
-> The arguments needs to be wrapped in parentheses however.
-### Practical Example
-> Below is an example where we are mapping a list of names ( a list of strings )
-> to `<li>` elements within a `<ul>` tag.
+#### Practical Example
+> Here is an example that shows the basics:
 ```html
+<!--
+    {{ }} = ** Template Logic Block ** 
+          - A block that is interpreted as templating logic
+
+    (( )) = ** Virtual File Block **
+          - Anything in here is just treated as if it was a completely new file.
+
+    ( ) = ** List **
+          - A list of elements, separated by newline or space.
+          - Aliases: [ ] 
+!-->
 <html>
-    <head>
-    </head>
     <body>
-       <ul>
+        <h1>{{ "My Headline" }}</h1>
+         <p>{{ "It works" }}</p>
+         <p>((It sure {{ "does" }}))</p>
+         <span>((
+         Here is some text that will be completely ignored.   
+         This: <b>{{ "Is not ignored however" }}</b>.
+         ))</span>
+         <ul>
             {{
-                @ = Σ(
-                    names ( <li>{{ @ = $ }}</li> )
+                (
+                    ((<li>Here is a item</li>))
+                    ((<li>Another item</li>))
                 )
             }}
-       </ul>
     </body>
 </html>
 ```
-> Here, `@` is assigned to the result of the function `Σ` (sigma).
-> `names` is a variable that is passed to the first argument of the function,
-> the second argument is a `((` `))` (ignored block).
-> This ignored block contains some HTML.
-> (the preprocessor doesn't really know about HTML, it is just text in the eyes of the interpreter).
-> Inside the HTML (or the text) is another `{{` , `}}` templating block.
-> In this block `@` is assigned to the first argument of the function passed to the
-> `Σ` function.
-> In this case, the `((` , `))` block is automatically wrapped by a temporary function
-> by the interpreter behind the scenes.
+#### Any interpreter you want
+> If you do not want to use the default language,
+> you can use any language you want to interpret the templates.
+> Here is an example where we are rendering a `<ul>` list using `Python`.
+```html
+<html>
+    <body>
+        <ul>
+((#!/usr/bin/python
+for i in range(100):
+    x = """((
+        <li>
+            {}     
+        </li>
+    ))""".format(i)
+    print(x)
+ ))
+        </ul>
+    </body>
+</html>
+```
+> To make this work, we simply put a comment inside our `(( ))` block.
+> This comment should start with a `#!` and then the path to the
+> program that should be interpreting the rest of the content inside of the
+> `(( ))` block.
