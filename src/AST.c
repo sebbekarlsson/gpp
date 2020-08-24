@@ -16,6 +16,7 @@ AST_T* init_ast(int type)
     ast->var_value = 0;
     ast->var_name = 0;
     ast->parent = 0;
+    ast->call_group = 0;
 
     ast->group_items = (void*) 0;
     ast->group_items_size = 0;
@@ -61,6 +62,24 @@ static char* ast_default_to_string(AST_T* ast)
     return val;
 }
 
+static char* ast_comp_to_string(AST_T* ast)
+{
+    const char* template = "AST_COMP %p";
+    char* val = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(val, template, ast);
+
+    return val;
+}
+
+static char* ast_raw_to_string(AST_T* ast)
+{
+    const char* template = "AST_RAW %p";
+    char* val = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(val, template, ast);
+
+    return val;
+}
+
 char* ast_to_string(AST_T* ast)
 {
     switch (ast->type)
@@ -68,6 +87,8 @@ char* ast_to_string(AST_T* ast)
         case AST_STRING: return ast_string_to_string(ast); break;
         case AST_VAR: return ast_var_to_string(ast); break;
         case AST_COMMENT: return ast_comment_to_string(ast); break;
+        case AST_COMP: return ast_comp_to_string(ast); break;
+        case AST_RAW: return ast_raw_to_string(ast); break;
         default: return ast_default_to_string(ast); break;
     }
 }

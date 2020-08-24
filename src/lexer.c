@@ -73,7 +73,7 @@ token_T* lexer_parse_id(lexer_T* lexer)
         value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
         strcat(value, charstr(lexer->c));
         lexer_advance(lexer);
-    } while (lexer->c != '\0' && isalpha(lexer->c));
+    } while (lexer->c != '\0' && (isalpha(lexer->c) || isdigit(lexer->c)));
 
     return init_token(value, TOKEN_ID);
 }
@@ -136,7 +136,7 @@ token_T* lexer_parse_any(lexer_T* lexer)
             lexer_advance(lexer);
         }
     }
-
+    
     return init_token(value, TOKEN_STRING);
 }
 
@@ -161,6 +161,7 @@ token_T* lexer_parse_raw_end(lexer_T* lexer)
 token_T* lexer_parse_comp_begin(lexer_T* lexer)
 {
     char* value = charstr(lexer->c);
+
 
     lexer_advance(lexer);
     lexer_skip_whitespace(lexer);
@@ -190,7 +191,7 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
     int lcount = 0;
     int close_count = 0;
     unsigned int shift = 0;
-
+    
     char* value = (char*) calloc(1, sizeof(char));
     value[0] = '\0';
     open_count += (lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1);
@@ -199,8 +200,8 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
     
     while (lexer->c != '\0')
     {
-        if ((lexer->c == '{' && lexer_peek(lexer, 1) == '{'))
-               break;
+        //if ((lexer->c == '{' && lexer_peek(lexer, 1) == '{'))
+        //       break;
 
         if (lexer->c == '#')
             break;
@@ -285,7 +286,15 @@ token_T* lexer_next_token(lexer_T* lexer)
 
        if (lexer->c == '\0') break;
 
-       if (isalpha(lexer->c) || lexer->c == '@' || lexer->c == '$') return lexer_advance_token(lexer, lexer_parse_id(lexer));
+       if (lexer->c == '$')
+       {
+           token_T* tok = lexer_parse_id(lexer);
+           return tok;
+       };
+       
+       if (lexer->c == '\0') break;
+
+       if (isalpha(lexer->c) || lexer->c == '$') return lexer_advance_token(lexer, lexer_parse_id(lexer));
 
        switch (lexer->c)
        {

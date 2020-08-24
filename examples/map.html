@@ -3,11 +3,9 @@
     </head>
     <body>
        <ul>
-            {{
-                @ = Σ(
-                    names ( <li>{{ @ = $ }}</li> )
-                )
-            }}
+           {{
+           map (["hello" "world"]  (@<li>{{ $0 }}</li>@) )
+           }}
        </ul>
     </body>
 </html>

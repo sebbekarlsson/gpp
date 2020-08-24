@@ -74,6 +74,7 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
         default: if (parser->token->type != TOKEN_EOF ) { printf("[Parser]: Unexpected `%s` `%s`\n", token_to_str(parser->token), parser->token->value); exit(1); } break;
     }
 
+
     if (ast != (void*) 0)
     {
         ast->parent = parent;
@@ -93,7 +94,7 @@ AST_T* parser_parse_raw(parser_T* parser, AST_T* parent)
     AST_T* ast = init_ast(AST_RAW);
     ast->raw_value = (char*) calloc(strlen(value) + 1, sizeof(char));
     strcpy(ast->raw_value, value);
-    gpp_result_T* evres = gpp_eval(ast->raw_value, 0);
+    gpp_result_T* evres = gpp_eval(ast->raw_value, 0, 1);
     ast->raw_child = evres->node;
     ast->result = evres->res;
 
@@ -125,7 +126,7 @@ AST_T* parser_parse_comp(parser_T* parser, AST_T* parent)
         }
     }
 
-    parser_eat(parser, TOKEN_COMP_END);
+    parser_eat(parser, TOKEN_COMP_END); 
 
     return ast;
 }
@@ -137,9 +138,21 @@ AST_T* parser_parse_id(parser_T* parser, AST_T* parent)
     if (parser->token->type == TOKEN_EQUALS)
         return parser_parse_assign(parser, parent);
 
+    char* var_name = (char*) calloc(strlen(parser->prev_token->value) + 1, sizeof(char));
+    strcpy(var_name, parser->prev_token->value);
+
+    if(parser->token->type == TOKEN_LBRACKET || parser->token->type == TOKEN_LPAREN)
+    {
+        AST_T* ast_call = init_ast(AST_CALL);
+        ast_call->var_name = var_name;
+        AST_T* ast_group = parser_parse_group(parser, parent);
+        ast_call->call_group = ast_group;
+
+        return ast_call;
+    }
+    
     AST_T* ast = init_ast(AST_VAR);
-    ast->var_name = (char*) calloc(strlen(parser->prev_token->value) + 1, sizeof(char));
-    strcpy(ast->var_name, parser->prev_token->value);
+    ast->var_name = var_name;
     ast->var_value = (void*)0;
 
     return ast;
@@ -196,7 +209,7 @@ AST_T* parser_parse_group(parser_T* parser, AST_T* parent)
 
     AST_T* ast = init_ast(AST_GROUP);
     
-    while (parser->token->type != (is_bracket ? TOKEN_RBRACKET : TOKEN_RPAREN))
+    while (parser->token->type != (is_bracket ? TOKEN_RBRACKET : TOKEN_RPAREN) && parser->token->type != TOKEN_EOF)
     {
         AST_T* item = parser_parse_expr(parser, parent);
 
@@ -222,7 +235,6 @@ AST_T* parser_parse_group(parser_T* parser, AST_T* parent)
     {
         parser_eat(parser, TOKEN_RPAREN);
     }
-
 
     return ast;
 }

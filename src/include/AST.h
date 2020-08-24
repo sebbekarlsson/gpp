@@ -14,6 +14,7 @@ typedef struct AST_STRUCT {
         AST_GROUP,
         AST_ROOT,
         AST_COMMENT,
+        AST_CALL,
     } type;
 
     char* ignore_value;
@@ -26,6 +27,8 @@ typedef struct AST_STRUCT {
     struct AST_STRUCT* parent;
     char* string_value;
     char* var_name;
+    
+    struct AST_STRUCT* call_group;
     
     struct AST_STRUCT** group_items;
     size_t group_items_size;
