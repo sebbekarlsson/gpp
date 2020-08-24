@@ -1,6 +1,13 @@
 #ifndef GPP_LEXER_H
 #define GPP_LEXER_H
 #include "token.h"
+
+#define VFB0 '('
+#define VFB1 '@'
+
+#define VFE0 '@'
+#define VFE1 ')'
+
 typedef struct LEXER_STRUCT {
     unsigned int i;
     unsigned int len;

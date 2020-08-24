@@ -6,24 +6,23 @@
     <body>
         <h2>I really want this list to be rendered using Python!</h2>
         <ul>
-((#!/usr/bin/python
+(@#!/usr/bin/python
 for name in ["john", "sarah", "anna"]:
-    x = """((
+    x = """(@
         <li>
             {}     
         </li>
-    ))""".format(name)
+    @)""".format(name)
     print(x)
- ))
+ @)
         </ul>
 
         <h2>I do want this list to be rendered in Node.js though</h2>
         <ul>
-((#!/usr/bin/node
-const result = ["john", "sarah", "anna"].map(name => "<li>" + name +  "</li>");
-const html = result.join('\n');
-console.log(html);
-))
+(@#!/usr/bin/node
+console.log(["john", "sarah", "anna"]
+    .map(name => "(@<li>" + name + "</li>@)" ).join('\n'));
+@)
         </ul>
     </body>
 </html>
@@ -36,14 +35,14 @@ console.log(html);
 #### {{ , }}
 > The `{{` and the `}}` tokens are used to indicate the start `{{` and the end `}}`
 > of a block of templating logic.
-#### (( , ))
-> The `((` and the `))` tokens are used to indicate the start `((` and the end `))`
+#### (@ , @)
+> The `(@` and the `@)` tokens are used to indicate the start `(@` and the end `@)`
 > of a ignored block.
 > And ignored block is something that is just treated as text by the preprocessor.
 > In other words, nothing within these tokens will be interpreted.
 > The entire document is by default wrapped in a ignored block.
 ##### One Exception
-> There is one exception to the `(( ))` (ignore block) however,
+> There is one exception to the `(@ @)` (ignore block) however,
 > if you specify a path to an interpreter, the rest of the content will be
 > interpreted. _(There is an example further down in this document)_
 
@@ -58,7 +57,7 @@ console.log(html);
 ```
 > The following:  
 ```html
-<p>(( "hello" ))</p>
+<p>(@ "hello" @)</p>
 ```
 > Will be rendered as:
 ```html
@@ -71,7 +70,7 @@ console.log(html);
     {{ }} = ** Template Logic Block ** 
           - A block that is interpreted as templating logic
 
-    (( )) = ** Virtual File Block **
+    (@ @) = ** Virtual File Block **
           - Anything in here is just treated as if it was a completely new file.
 
     ( ) = ** List **
@@ -82,16 +81,16 @@ console.log(html);
     <body>
         <h1>{{ "My Headline" }}</h1>
          <p>{{ "It works" }}</p>
-         <p>((It sure {{ "does" }}))</p>
-         <span>((
+         <p>(@It sure {{ "does" }}@)</p>
+         <span>(@
          Here is some text that will be completely ignored.   
          This: <b>{{ "Is not ignored however" }}</b>.
-         ))</span>
+         @)</span>
          <ul>
             {{
                 (
-                    ((<li>Here is a item</li>))
-                    ((<li>Another item</li>))
+                    (@<li>Here is a item</li>@)
+                    (@<li>Another item</li>@)
                 )
             }}
     </body>
@@ -105,20 +104,20 @@ console.log(html);
 <html>
     <body>
         <ul>
-((#!/usr/bin/python
+(@#!/usr/bin/python
 for i in range(100):
-    x = """((
+    x = """(@
         <li>
             {}     
         </li>
-    ))""".format(i)
+    @)""".format(i)
     print(x)
- ))
+ @)
         </ul>
     </body>
 </html>
 ```
-> To make this work, we simply put a comment inside our `(( ))` block.
+> To make this work, we simply put a comment inside our `(@ @)` block.
 > This comment should start with a `#!` and then the path to the
 > program that should be interpreting the rest of the content inside of the
-> `(( ))` block.
+> `(@ @)` block.
