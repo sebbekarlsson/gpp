@@ -18,6 +18,9 @@ AST_T* init_ast(int type)
 
     ast->group_items = (void*) 0;
     ast->group_items_size = 0;
+    ast->result = 0;
+
+    ast->buffered = 0;
 
     return ast;
 }

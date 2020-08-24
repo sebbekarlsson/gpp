@@ -21,7 +21,7 @@ void visitor_buffer(visitor_T* visitor, char* buffstr)
     }
     else
     {
-        visitor->buffer = realloc(visitor->buffer, (strlen(visitor->buffer) + strlen(buffstr) + 1) * sizeof(char));
+        visitor->buffer = realloc(visitor->buffer, (strlen(visitor->buffer) + strlen(buffstr) + 2) * sizeof(char));
         strcat(visitor->buffer, buffstr);
     }
 }
@@ -52,8 +52,15 @@ AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node)
 
 AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node)
 {
-    for (int i = 0; i < (int)node->group_items_size; i++)
-        visitor_buffer(visitor, ast_to_string(node->group_items[i]));
+    if (node->result)
+    {
+        visitor_buffer(visitor, node->result);
+        return node->raw_child;
+    }
+    else
+    {
+        visitor_buffer(visitor, node->raw_value);
+    }
 
     return node;
 }

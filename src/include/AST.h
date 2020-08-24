@@ -29,6 +29,9 @@ typedef struct AST_STRUCT {
 
     struct AST_STRUCT** root_items;
     size_t root_items_size;
+
+    unsigned int buffered;
+    char* result;
 } AST_T;
 
 AST_T* init_ast(int type);

@@ -1,5 +1,30 @@
+<!--
+    {{ }} = ** Template Logic Block ** 
+          - A block that is interpreted as templating logic
+
+    (( )) = ** Virtual File Block **
+          - Anything in here is just treated as if it was a completely new file.
+
+    ( ) = ** List **
+          - A list of elements, separated by newline or space.
+          - Aliases: [ ] 
+!-->
 <html>
     <body>
-        <h1>hello</h1>
+        <h1>{{ "My Headline" }}</h1>
+         <p>{{ "It works" }}</p>
+         <p>((It sure {{ "does" }}))</p>
+         <span>((
+         Here is some text that will be completely ignored.   
+         This: <b>{{ "Is not ignored however" }}</b>.
+         ))</span>
+         <ul>
+            {{
+                (
+                    ((<li>Here is a item</li>))
+                    ((<li>Another item</li>))
+                )
+            }}
+         </ul>
     </body>
 </html>
