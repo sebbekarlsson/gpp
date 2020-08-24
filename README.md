@@ -96,7 +96,26 @@ console.log(["john", "sarah", "anna"]
     </body>
 </html>
 ```
-#### Any interpreter you want
+### Built-in functions
+### map
+> `map` is used to map an iterable, below is an example where
+> we render a `<ul>` using map:
+```html
+<html>
+    <head>
+    </head>
+    <body>
+       <ul>
+           {{ map (["hello" "world"]  (@<li>{{ $0 }}</li>@)) }}
+       </ul>
+    </body>
+</html>
+```
+> The syntax is:
+```
+map ( <list of items> <yield> )
+```
+### Any interpreter you want
 > If you do not want to use the default language,
 > you can use any language you want to interpret the templates.
 > Here is an example where we are rendering a `<ul>` list using `Python`.
