@@ -1,5 +1,6 @@
 #include "include/visitor.h"
 #include "include/main.h"
+#include "include/io.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -205,6 +206,8 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
     AST_T** args = node->call_group->group_items;
     int args_size = (int) node->call_group->group_items_size;
 
+    // TODO: abstract these away from the visitor.
+
     if (strcmp(node->var_name, "map") == 0)
     {
         if (args_size < 2)
@@ -218,6 +221,45 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
             AST_T* item = iterable->group_items[i];
 
             visitor_visit(visitor, mapping, 1, (AST_T*[]){ item });
+        }
+    }
+    else
+    if (strcmp(node->var_name, "cat") == 0)
+    {
+        if (args_size < 1)
+            return node;
+
+        for (int i = 0; i < args_size; i++)
+        {
+            AST_T* string = (AST_T*) args[i];
+
+            if (!string->string_value)
+                continue;
+
+            char* contents = gpp_read_file(string->string_value);
+            visitor_buffer(visitor, contents);
+            free(contents);
+        }
+    }
+    else
+    if (strcmp(node->var_name, "cate") == 0)
+    {
+        if (args_size < 1)
+            return node;
+
+        for (int i = 0; i < args_size; i++)
+        {
+            AST_T* string = (AST_T*) args[i];
+
+            if (!string->string_value)
+                continue;
+
+            char* contents = gpp_read_file(string->string_value);
+            gpp_result_T* res = gpp_eval(contents, 0, 0);
+            visitor_buffer(visitor, res->res);
+            free(contents);
+            free(res->res);
+            free(res);
         }
     }
 

@@ -1,0 +1,41 @@
+<html>
+    <body>
+        <h1>{{ "Welcome" }}</h1>
+        <h2>The basics</h2>
+        <section>
+            <h3>Virtual file blocks and compute blocks</h3>
+            <span>
+                (@
+                    Here is some text that will be completely ignored.   
+                    This: <b>{{ "Is not ignored however" }}</b>.
+                @)
+            </span>
+            <h3>Mapping a list to HTML</h3>
+            <ul>
+               {{ map (["apple" "banana" "pear" "orange"]  (@<li>{{ $0 }}</li>@)) }}
+            </ul>
+        </section>
+        <h2>Integrating other languages</h2>
+        <section>
+            <h3>I really want this list to be rendered using Python!</h3>
+            <ul>
+(@#!/usr/bin/python
+for name in ["john", "sarah", "anna"]:
+    x = """(@
+        <li>
+            {}     
+        </li>
+    @)""".format(name)
+    print(x)
+ @)
+            </ul>
+            <h3>I do want this list to be rendered in Node.js though</h3>
+            <ul>
+(@#!/home/ianertson/shit/node-v12.18.1-linux-x64/bin/node
+console.log(["john", "sarah", "anna"]
+    .map(name => "(@<li>" + name + "</li>@)" ).join('\n'));
+@)
+            </ul>
+        </section>
+    </body>
+</html>

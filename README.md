@@ -1,11 +1,71 @@
 # GPP
-> General PreProcessor
+> General PreProcessor  
+> _not just for HTML, it can be used anywhere_
 
 ```html
+<!--
+    {{ }} = ** Compute Block ** 
+          - A block that is interpreted as templating logic
+
+    (@ @) = ** Virtual File Block **
+          - Anything in here is just treated as if it was a completely new file.
+            This block is also used to tell the pre-processor that something
+            should be evaluated "lazy".
+
+    ( ) = ** List **
+          - A list of elements, separated by newline or space.
+          - Aliases: [ ]
+
+    map = ** Built-in function **
+          - It does what you expect, just like the map function in for example
+            Javascript, it takes in an iterable as the first argument and a
+            yield / function as the second argument. 
+
+    cat = ** Built-in function **
+          - This function simply reads an infinite list of files, concatenates
+            the contents and dumps it out as it is.
+            The contents of the files are just treated as text and not evaluated.
+            This function takes in an infinite list of strings as an argument.
+
+    cate = ** Built-in function **
+          - Just like `cat` but it also evaluates the content of the files
+            before concatenating them and dumping it out. 
+
+    $ = ** Positional parameter constant **
+          - This is heavily inspired by the shell, it allows you to access
+            the positional arguments within a function body.
+            For example, to access the first argument you would use `$0`,
+            to access the second one you would use `$1`, and then `$2`...
+            and so on and so forth. 
+!-->
 <html>
     <body>
-        <h2>I really want this list to be rendered using Python!</h2>
-        <ul>
+        <h1>{{ "Welcome" }}</h1>
+        <h2>The basics</h2>
+        <section>
+            <h3>Virtual file blocks and compute blocks</h3>
+            <span>
+                (@
+                    Here is some text that will be completely ignored.   
+                    This: <b>{{ "Is not ignored however" }}</b>.
+                @)
+            </span>
+
+            <h3>Mapping a list to HTML</h3>
+            <ul>
+               {{ map (["apple" "banana" "pear" "orange"]  (@<li>{{ $0 }}</li>@)) }}
+            </ul>
+
+            <h3>Dumping out file contents</h3>
+            <pre>{{ cat ("src/main.c") }}</pre>
+
+            <h3>Below will be evaluated</h3>
+            <p>{{ cate ("examples/hello.html") }}</p>
+        </section>
+        <h2>Integrating other languages</h2>
+        <section>
+            <h3>I really want this list to be rendered using Python!</h3>
+            <ul>
 (@#!/usr/bin/python
 for name in ["john", "sarah", "anna"]:
     x = """(@
@@ -15,15 +75,15 @@ for name in ["john", "sarah", "anna"]:
     @)""".format(name)
     print(x)
  @)
-        </ul>
-
-        <h2>I do want this list to be rendered in Node.js though</h2>
-        <ul>
+            </ul>
+            <h3>I do want this list to be rendered in Node.js though</h3>
+            <ul>
 (@#!/usr/bin/node
 console.log(["john", "sarah", "anna"]
     .map(name => "(@<li>" + name + "</li>@)" ).join('\n'));
 @)
-        </ul>
+            </ul>
+        </section>
     </body>
 </html>
 ```
@@ -37,16 +97,14 @@ console.log(["john", "sarah", "anna"]
 > of a block of templating logic.
 #### (@ , @)
 > The `(@` and the `@)` tokens are used to indicate the start `(@` and the end `@)`
-> of a ignored block.
-> And ignored block is something that is just treated as text by the preprocessor.
+> of a virtual file block.
+> A virtual file block is something that is just treated as text by the preprocessor.
 > In other words, nothing within these tokens will be interpreted.
-> The entire document is by default wrapped in a ignored block.
-##### One Exception
-> There is one exception to the `(@ @)` (ignore block) however,
+> The entire document is by default wrapped in a virtual file block.  
+> **There is one exception** to the `(@ @)` (virtual file block) however,
 > if you specify a path to an interpreter, the rest of the content will be
 > interpreted. _(There is an example further down in this document)_
-
-#### How the blocks work
+#### If you still do not understand
 > The following:  
 ```html
 <p>{{ "hello" }}</p>
@@ -63,59 +121,8 @@ console.log(["john", "sarah", "anna"]
 ```html
 <p> "hello" </p>
 ```
-#### Practical Example
-> Here is an example that shows the basics:
-```html
-<!--
-    {{ }} = ** Template Logic Block ** 
-          - A block that is interpreted as templating logic
 
-    (@ @) = ** Virtual File Block **
-          - Anything in here is just treated as if it was a completely new file.
-
-    ( ) = ** List **
-          - A list of elements, separated by newline or space.
-          - Aliases: [ ] 
-!-->
-<html>
-    <body>
-        <h1>{{ "My Headline" }}</h1>
-         <p>{{ "It works" }}</p>
-         <p>(@It sure {{ "does" }}@)</p>
-         <span>(@
-         Here is some text that will be completely ignored.   
-         This: <b>{{ "Is not ignored however" }}</b>.
-         @)</span>
-         <ul>
-            {{
-                (
-                    (@<li>Here is a item</li>@)
-                    (@<li>Another item</li>@)
-                )
-            }}
-    </body>
-</html>
-```
-### Built-in functions
-### map
-> `map` is used to map an iterable, below is an example where
-> we render a `<ul>` using map:
-```html
-<html>
-    <head>
-    </head>
-    <body>
-       <ul>
-           {{ map (["hello" "world"]  (@<li>{{ $0 }}</li>@)) }}
-       </ul>
-    </body>
-</html>
-```
-> The syntax is:
-```
-map ( <list of items> <yield> )
-```
-### Any interpreter you want
+## Any interpreter you want
 > If you do not want to use the default language,
 > you can use any language you want to interpret the templates.
 > Here is an example where we are rendering a `<ul>` list using `Python`.
@@ -140,3 +147,88 @@ for i in range(100):
 > This comment should start with a `#!` and then the path to the
 > program that should be interpreting the rest of the content inside of the
 > `(@ @)` block.
+
+## Installation
+> Ready to use this piece of software?
+### 1. Clone it (or download it)
+> Go and get the source code, if you are reading this on Github,  
+> then just copy the clone URL and clone it down.
+```
+git clone <url>
+```
+### 2. Compile it
+> Make sure you have a compiler on your system, preferably `gcc`.
+> You can read more about `gcc` here: [https://gcc.gnu.org/](https://gcc.gnu.org/)  
+> You also need to make sure you have `make` on your system.  
+> You can read more about `make` here: [https://www.gnu.org/software/make/](https://www.gnu.org/software/make/).  
+> **Alright!** time to compile this thing.
+>
+> **Go to the root directory** - Open up a shell and go to the root directory of this project:
+```bash
+cd gpp/
+```
+> **Execute Make** - Run the make command
+```bash
+make
+```
+> **!!!Abrakadabra!!!**
+### 3. Run it
+> You are now ready to use this,
+> Here is how you do that:
+```bash
+./a.out index.html
+``` 
+> Yes... I know `a.out` is not really a production ready name for a binary.  
+> But this software is still in the _work in progress_ stage.  
+> Anyways, so you execute the `a.out` file and you give it a filename as
+> the first argument and then it will just print out the transpiled / compiled
+> content to `stdout`.
+
+## Plans
+> Here are some plans / thoughts.  
+> If you feel like you could help implement some of them, feel free
+> to make a pull-request.   
+- [ ] Write better documentation
+- [ ] Create a shared library to allow the use of this in other languages
+- [ ] Implement bindings for NodeJS 
+- [ ] Implement bindings for Python  
+> Now, these are not tasks / issues.  
+> This is just some ideas and I am just thinking out loud.  
+> Bugs, Todos, and tasks will be seen in Github's issues section.
+
+## FAQ
+```
+How is this software licensed?
+```
+> I don't know. Do what you want.
+```
+If I define a variable in my Python code,
+how can I later access it in my NodeJS block
+below?
+```
+> That is unfortunately not possible.  
+> If you want to share data between languages, you need to use the built-in
+> templating language to unserialize the data into your code blocks.
+```
+Isn't it unsafe to call the binary specified in the "!#" comment?
+```
+> Well, just don't put an unsafe binary there?  
+> This couldn't care less about what logic you write or which
+> binaries you use to interpret the code blocks.
+> This is just a templating language.
+```
+Does it work on Windows?
+```
+> I dont know, I haven't tried it there.  
+> But I assume it would be tricky to get it to work there,
+> since this software was developed on a Linux machine and the source code
+> has dependencies on C implementations on Linux... you know header files
+> and stuff.
+```
+How do I send data into the template context?
+```
+> You cannot currently do this (which makes this entire thing sort of useless)  
+> BUT! it is coming. This is a priority to implement.
+
+---
+**<div style="width: 100%; text-align: center;" align="center">:coffee: Not Made with Coffee and Love in San Francisco :coffee:</div>**
