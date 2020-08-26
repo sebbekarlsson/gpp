@@ -68,6 +68,7 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
         case TOKEN_COMP_BEGIN: ast = parser_parse_comp(parser, parent); break;
         case TOKEN_ID: ast = parser_parse_id(parser, parent); break;
         case TOKEN_STRING: ast = parser_parse_string(parser, parent); break;
+        case TOKEN_NUMBER: ast = parser_parse_number(parser, parent); break;
         case TOKEN_LPAREN: ast = parser_parse_group(parser, parent); break;
         case TOKEN_LBRACKET: ast = parser_parse_group(parser, parent); break;
         case TOKEN_COMMENT: ast = parser_parse_comment(parser, parent); break;
@@ -178,6 +179,17 @@ AST_T* parser_parse_string(parser_T* parser, AST_T* parent)
 
     AST_T* ast = init_ast(AST_STRING);
     ast->string_value = value;
+
+    return ast;
+}
+
+AST_T* parser_parse_number(parser_T* parser, AST_T* parent)
+{
+    char* value = parser->token->value;
+    parser_eat(parser, TOKEN_NUMBER);
+
+    AST_T* ast = init_ast(AST_FLOAT);
+    ast->float_value = atof(value);
 
     return ast;
 }

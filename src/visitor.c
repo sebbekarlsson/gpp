@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 static char* sh(char* binpath, char* source)
 {
@@ -66,6 +67,8 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
         case AST_COMP: return visitor_visit_comp(visitor, node, argc, argv); break;
         case AST_ASSIGN: return visitor_visit_assign(visitor, node, argc, argv); break;
         case AST_STRING: return visitor_visit_string(visitor, node, argc, argv); break;
+        case AST_FLOAT: return visitor_visit_float(visitor, node, argc, argv); break;
+        case AST_INT: return visitor_visit_int(visitor, node, argc, argv); break;
         case AST_VAR: return visitor_visit_var(visitor, node, argc, argv); break;
         case AST_CALL: return visitor_visit_call(visitor, node, argc, argv); break;
         case AST_GROUP: return visitor_visit_group(visitor, node, argc, argv); break;
@@ -183,6 +186,28 @@ AST_T* visitor_visit_string(visitor_T* visitor, AST_T* node, int argc, AST_T** a
     return node;
 }
 
+AST_T* visitor_visit_float(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
+{
+    const char* template = "%12.6f";
+    char* string_value = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(string_value, template, node->float_value);
+    visitor_buffer(visitor, string_value);
+    free(string_value);
+
+    return node;
+}
+
+AST_T* visitor_visit_int(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
+{
+    const char* template = "%d";
+    char* string_value = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(string_value, template, node->int_value);
+    visitor_buffer(visitor, string_value);
+    free(string_value);
+
+    return node;
+}
+
 AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
     if (node->var_name[0] == '$')
@@ -261,6 +286,18 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
             free(res->res);
             free(res);
         }
+    }
+    else
+    if (strcmp(node->var_name, "floor") == 0)
+    {
+        if (args_size < 1)
+            return node;
+
+        AST_T* number = (AST_T*) args[0];
+        AST_T* new_number = init_ast(AST_INT);
+        new_number->int_value = floor(number->float_value);
+
+        return visitor_visit(visitor, new_number, argc, argv);
     }
 
     return node;

@@ -13,6 +13,8 @@ AST_T* init_ast(int type)
     ast->comp_value = 0;
     ast->raw_child = 0;
     ast->string_value = 0;
+    ast->float_value = 0;
+    ast->int_value = 0;
     ast->var_value = 0;
     ast->var_name = 0;
     ast->parent = 0;

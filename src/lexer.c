@@ -95,6 +95,35 @@ token_T* lexer_parse_string(lexer_T* lexer)
     return init_token(value, TOKEN_STRING);
 }
 
+token_T* lexer_parse_number(lexer_T* lexer)
+{
+    char* value = (char*) calloc(1, sizeof(char));
+    value[0] = '\0';
+
+    do 
+    {
+        value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
+        strcat(value, charstr(lexer->c));
+        lexer_advance(lexer);
+    } while (lexer->c != '\0' && isdigit(lexer->c));
+
+    if (lexer->c == '.')
+    {
+        value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
+        strcat(value, charstr(lexer->c));
+        lexer_advance(lexer);
+
+        do 
+        {
+            value = (char*) realloc(value, (strlen(value) + 2) * sizeof(char));
+            strcat(value, charstr(lexer->c));
+            lexer_advance(lexer);
+        } while (lexer->c != '\0' && isdigit(lexer->c));
+    }
+
+    return init_token(value, TOKEN_NUMBER);
+}
+
 token_T* lexer_parse_comment(lexer_T* lexer)
 {
     lexer_advance(lexer);
@@ -294,6 +323,7 @@ token_T* lexer_next_token(lexer_T* lexer)
        
        if (lexer->c == '\0') break;
 
+       if (isdigit(lexer->c)) return lexer_parse_number(lexer);
        if (isalpha(lexer->c) || lexer->c == '$') return lexer_advance_token(lexer, lexer_parse_id(lexer));
 
        switch (lexer->c)

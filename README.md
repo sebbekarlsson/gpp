@@ -29,7 +29,10 @@
 
     cate = ** Built-in function **
           - Just like `cat` but it also evaluates the content of the files
-            before concatenating them and dumping it out. 
+            before concatenating them and dumping it out.
+
+    floor = ** Built-in function **
+          - Floors a number. For example, the input 60.6 would return 60.
 
     $ = ** Positional parameter constant **
           - This is heavily inspired by the shell, it allows you to access
