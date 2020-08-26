@@ -23,6 +23,10 @@ AST_T* visitor_visit_assign(visitor_T* visitor, AST_T* node, int argc, AST_T** a
 
 AST_T* visitor_visit_string(visitor_T* visitor, AST_T* node, int argc, AST_T** args);
 
+AST_T* visitor_visit_float(visitor_T* visitor, AST_T* node, int argc, AST_T** args);
+
+AST_T* visitor_visit_int(visitor_T* visitor, AST_T* node, int argc, AST_T** args);
+
 AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** args);
 
 AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** args);

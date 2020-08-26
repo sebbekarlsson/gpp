@@ -27,6 +27,8 @@ AST_T* parser_parse_assign(parser_T* parser, AST_T* parent);
 
 AST_T* parser_parse_string(parser_T* parser, AST_T* parent);
 
+AST_T* parser_parse_number(parser_T* parser, AST_T* parent);
+
 AST_T* parser_parse_comment(parser_T* parser, AST_T* parent);
 
 AST_T* parser_parse_group(parser_T* parser, AST_T* parent);

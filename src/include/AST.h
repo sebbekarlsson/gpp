@@ -10,6 +10,8 @@ typedef struct AST_STRUCT {
         AST_ASSIGN,
         AST_FUNCTION_CALL,
         AST_STRING,
+        AST_FLOAT,
+        AST_INT,
         AST_VAR,
         AST_GROUP,
         AST_ROOT,
@@ -26,6 +28,8 @@ typedef struct AST_STRUCT {
     struct AST_STRUCT* var_value;
     struct AST_STRUCT* parent;
     char* string_value;
+    float float_value;
+    int int_value;
     char* var_name;
     
     struct AST_STRUCT* call_group;
