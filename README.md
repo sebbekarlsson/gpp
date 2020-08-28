@@ -231,8 +231,8 @@ Does it work on Windows?
 ```
 How do I send data into the template context?
 ```
-> You cannot currently do this (which makes this entire thing sort of useless)  
-> BUT! it is coming. This is a priority to implement.
+> Put a `context.json` file in the root of your project,
+> you can later access all data in this file inside your templates. 
 
 ---
 **<div style="width: 100%; text-align: center;" align="center">:coffee: Not Made with Coffee and Love in San Francisco :coffee:</div>**
