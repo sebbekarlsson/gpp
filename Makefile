@@ -20,7 +20,7 @@ install:
 	mkdir -p /usr/local/include/gpp
 	cp -r ./src/include/* /usr/local/include/gpp/.
 	cp ./libgpp.a /usr/local/lib/.
-	cp ./gpp.out /usr/local/bin/gpp
+	cp ./a.out /usr/local/bin/gpp
 
 clean:
 	-rm *.out

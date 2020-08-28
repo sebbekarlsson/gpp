@@ -281,23 +281,13 @@ AST_T* step_left_lookup (visitor_T* visitor, AST_T* node, char* varname, int arg
 AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
     if (node->var_value)
-        return node->var_value;
-
-    if (node->var_name[0] == '$')
-    {
-        char* newstr = charstr(node->var_name[1]);
-        int index = atoi(newstr);
-        free(newstr);
-
-        if (argc >= index && argc != 0)
-           return visitor_visit(visitor, argv[index], argc, argv);
-    }
+        return node->var_value; 
 
     AST_T* look = visitor->object;
 
     if (argc)
     {
-        look = argv[1];
+        look = argv[0];
     }
 
     AST_T* var = (void*)0;
@@ -310,6 +300,18 @@ AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
             var = visitor_visit(visitor, global_value->var_value, argc, argv);
         else
             var = visitor_visit(visitor, global_value, argc, argv);
+    }
+    else
+    {
+        if (node->var_name[0] == '$')
+        {
+            char* newstr = charstr(node->var_name[1]);
+            int index = atoi(newstr);
+            free(newstr);
+
+            if (argc >= index && argc != 0)
+               var = visitor_visit(visitor, argv[index], argc, argv);
+        }
     }
     
     if (node->right)
@@ -403,6 +405,40 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
         new_number->int_value = floor(number->float_value);
 
         return visitor_visit(visitor, new_number, argc, argv);
+    }
+    else
+    if (strcmp(node->var_name, "key") == 0)
+    {
+        if (args_size < 2)
+            return node;
+
+        AST_T* ast_index = (AST_T*) args[0];
+        AST_T* object = (AST_T*) visitor_visit(visitor, args[1], argc, argv);
+
+        if (object->object_vars_size >= ast_index->int_value)
+        {
+            AST_T* var = object->object_vars[ast_index->int_value];
+            AST_T* string = init_ast(AST_STRING);
+            string->string_value = var->var_name;
+
+            return visitor_visit(visitor, string, argc, argv);
+        }
+    }
+    if (strcmp(node->var_name, "value") == 0)
+    {
+        if (args_size < 2)
+            return node;
+
+        AST_T* ast_index = (AST_T*) args[0];
+        AST_T* object = (AST_T*) visitor_visit(visitor, args[1], argc, argv);
+
+        if (object->object_vars_size >= ast_index->int_value)
+        {
+            AST_T* var = object->object_vars[ast_index->int_value];
+            
+            if (var->var_value)
+                return visitor_visit(visitor, var->var_value, argc, argv);
+        }
     }
 
     return node;
