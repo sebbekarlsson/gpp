@@ -20,6 +20,7 @@ typedef struct TOKEN_STRUCT {
         TOKEN_STRING,
         TOKEN_NUMBER,
         TOKEN_COMMENT,
+        TOKEN_DOT,
     } type;
 } token_T;
 #endif

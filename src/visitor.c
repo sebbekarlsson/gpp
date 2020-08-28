@@ -6,6 +6,21 @@
 #include <stdlib.h>
 #include <math.h>
 
+void assert_not_nil(void* x, const char* msg)
+{
+    if (!!x) return;
+    printf("ASSERT FAILED. ITEM IS NIL (%p) - %s\n", x, msg);
+}
+
+static char* charstr(char c)
+{
+    char* new_str = (char*) calloc(2, sizeof(char));
+    new_str[0] = c;
+    new_str[1] = '\0';
+
+    return new_str;
+}
+
 static char* sh(char* binpath, char* source)
 {
   char* output = (char*) calloc(1, sizeof(char));
@@ -36,10 +51,34 @@ static char* sh(char* binpath, char* source)
   return output;
 }
 
-visitor_T* init_visitor()
+static AST_T* obj_var_lookup(AST_T* object, char* var_name)
+{
+    if (object == (void*)0) return (void*)0;
+
+    for (int i = 0; i < (int) object->object_vars_size; i++)
+    {
+        AST_T* var = object->object_vars[i];
+
+
+        if (!var)
+            continue;
+
+        if (!var->var_name || !var_name)
+            continue;
+
+        if (strcmp(var->var_name, var_name) == 0)
+            return var->var_value;
+    }
+
+    return (void*)0;
+}
+
+visitor_T* init_visitor(AST_T* object)
 {
     visitor_T* visitor = (visitor_T*) calloc(1, sizeof(struct VISITOR_STRUCT));
     visitor->buffer = (void*)0;
+    visitor->object = object;
+    visitor->follow_pointers = 1;
 
     return visitor;
 }
@@ -58,8 +97,26 @@ void visitor_buffer(visitor_T* visitor, char* buffstr)
     }
 }
 
+AST_T* visitor_visit_ptr(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
+{
+    AST_T* left = node->left;
+
+    if (left->type == AST_OBJECT)
+    {
+        AST_T* var = obj_var_lookup(left, node->var_name);
+
+
+        if (var) return var;
+    }
+
+    return visitor_visit(visitor, left, argc, argv);
+
+}
+
 AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
+    assert_not_nil(node, "[Visitor.visit]: Node is nil.");
+
     switch (node->type)
     {
         case AST_ROOT: return visitor_visit_root(visitor, node, argc, argv); break;
@@ -72,6 +129,7 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
         case AST_VAR: return visitor_visit_var(visitor, node, argc, argv); break;
         case AST_CALL: return visitor_visit_call(visitor, node, argc, argv); break;
         case AST_GROUP: return visitor_visit_group(visitor, node, argc, argv); break;
+        case AST_OBJECT: return visitor_visit_object(visitor, node, argc, argv); break;
         case AST_COMMENT: return init_ast(AST_NOOP); break;
         default: printf("[Visitor]: Unhandled node of type `%d`\n", node->type); exit(1); break;
     }
@@ -208,22 +266,68 @@ AST_T* visitor_visit_int(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
     return node;
 }
 
+AST_T* step_left_lookup (visitor_T* visitor, AST_T* node, char* varname, int argc, AST_T** argv)
+{
+    printf("%s %p!\n", ast_to_string(node), node->left);
+    AST_T* var = obj_var_lookup(node, varname);
+    if (var) return var;
+
+    if (node->left)
+        return step_left_lookup(visitor, visitor_visit(visitor, node->left, argc, argv), varname, argc, argv);
+
+    return node;
+}
+
 AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
+    if (node->var_value)
+        return node->var_value;
+
     if (node->var_name[0] == '$')
     {
-        int index = (int) atoi((char[]){ node->var_name[1], '\0'});
+        char* newstr = charstr(node->var_name[1]);
+        int index = atoi(newstr);
+        free(newstr);
 
         if (argc >= index && argc != 0)
-            return visitor_visit(visitor, argv[index], argc, argv);
-    }
-    if (node->var_value == (void*)0)
-    {
-        printf("[Visitor.visit_var]: `%s` is not defined.\n", node->var_name);
-        exit(1);
+           return visitor_visit(visitor, argv[index], argc, argv);
     }
 
-    return visitor_visit(visitor, node->var_value, argc, argv);
+    AST_T* look = visitor->object;
+
+    if (argc)
+    {
+        look = argv[1];
+    }
+
+    AST_T* var = (void*)0;
+
+    AST_T* global_value = obj_var_lookup(look, node->var_name);
+
+    if (global_value)
+    {
+        if (global_value->var_value)
+            var = visitor_visit(visitor, global_value->var_value, argc, argv);
+        else
+            var = visitor_visit(visitor, global_value, argc, argv);
+    }
+    
+    if (node->right)
+    {
+        return visitor_visit(visitor, node->right, 1, (AST_T*[]) { var });
+    }
+    else
+    {
+        if (var)
+        {
+            return var;
+        }
+    }
+
+    
+
+    printf("[Visitor.visit_var]: `%s` is not defined.\n", node->var_name);
+    exit(1);
 }
 
 AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
@@ -238,7 +342,8 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
         if (args_size < 2)
             return node;
 
-        AST_T* iterable = (AST_T*) args[0];
+
+        AST_T* iterable = ((AST_T*)args[0])->type == AST_VAR ? visitor_visit(visitor, args[0], argc, argv) : ((AST_T*)args[0]);
         AST_T* mapping = (AST_T*) args[1];
 
         for (int i = 0; i < (int)iterable->group_items_size; i++)
@@ -308,5 +413,10 @@ AST_T* visitor_visit_group(visitor_T* visitor, AST_T* node, int argc, AST_T** ar
     for (int i = 0; i < (int) node->group_items_size; i++)
         visitor_visit(visitor, node->group_items[i], argc, argv);
 
+    return node;
+}
+
+AST_T* visitor_visit_object(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
+{
     return node;
 }

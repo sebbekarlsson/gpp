@@ -157,8 +157,9 @@ for i in range(100):
 > Go and get the source code, if you are reading this on Github,  
 > then just copy the clone URL and clone it down.
 ```
-git clone <url>
+git clone <url> --recurse-submodules
 ```
+> Do NOT forget the `--recurse-submodules` flag. 
 ### 2. Compile it
 > Make sure you have a compiler on your system, preferably `gcc`.
 > You can read more about `gcc` here: [https://gcc.gnu.org/](https://gcc.gnu.org/)  
