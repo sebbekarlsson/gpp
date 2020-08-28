@@ -125,6 +125,28 @@ console.log(["john", "sarah", "anna"]
 <p> "hello" </p>
 ```
 
+## Loading data
+> What is a templating engine without any data to work with?  
+> To access data in your templates, simply put a `context.json` file
+> within the root of your project.  
+> Example (`context.json`):
+```json
+{
+    "title": "My Title",
+    "favouriteFruits": ["apple", "pear", "banana"]
+}
+```
+> Now you can access these variables in your templates,  
+> Example:
+```html
+<html>
+    <title>{{ title }}</title>
+    <body>
+        {{ map (favouriteFruits  (@<li>{{ $0 }}</li>@)) }}
+    </body>
+</html>
+```
+
 ## Any interpreter you want
 > If you do not want to use the default language,
 > you can use any language you want to interpret the templates.
