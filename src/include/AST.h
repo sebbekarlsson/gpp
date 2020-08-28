@@ -17,6 +17,8 @@ typedef struct AST_STRUCT {
         AST_ROOT,
         AST_COMMENT,
         AST_CALL,
+        AST_OBJECT,
+        AST_DOT,
     } type;
 
     char* ignore_value;
@@ -39,6 +41,12 @@ typedef struct AST_STRUCT {
 
     struct AST_STRUCT** root_items;
     size_t root_items_size;
+
+    struct AST_STRUCT** object_vars;
+    size_t object_vars_size;
+
+    struct AST_STRUCT* left;
+    struct AST_STRUCT* right;
 
     unsigned int buffered;
     char* result;

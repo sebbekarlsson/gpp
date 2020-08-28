@@ -33,6 +33,7 @@ token_T* parser_eat(parser_T* parser, int type)
 AST_T* parser_parse(parser_T* parser, AST_T* parent) {
     AST_T* ast = init_ast(AST_ROOT);
 
+
     while (parser->token->type != TOKEN_EOF)
     {
         AST_T* item = parser_parse_expr(parser, ast);
@@ -72,13 +73,22 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
         case TOKEN_LPAREN: ast = parser_parse_group(parser, parent); break;
         case TOKEN_LBRACKET: ast = parser_parse_group(parser, parent); break;
         case TOKEN_COMMENT: ast = parser_parse_comment(parser, parent); break;
-        default: if (parser->token->type != TOKEN_EOF ) { printf("[Parser]: Unexpected `%s` `%s`\n", token_to_str(parser->token), parser->token->value); exit(1); } break;
+        default: if (parser->token->type != TOKEN_EOF && parser->token->type != TOKEN_DOT ) { printf("[Parser]: Unexpected `%s` `%s`\n", token_to_str(parser->token), parser->token->value); exit(1); } break;
     }
 
 
     if (ast != (void*) 0)
     {
         ast->parent = parent;
+        
+        if (parser->token->type == TOKEN_DOT)
+        {
+            parser_eat(parser, TOKEN_DOT);
+            AST_T* ptrast = parser_parse_expr(parser, parent);
+
+            ast->right = ptrast;
+        }
+
         return ast;
     }
 

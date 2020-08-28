@@ -1,10 +1,11 @@
 exec = a.out
 sources = $(wildcard src/*.c)
 objects = $(sources:.c=.o)
-flags = -g -Wall -lm -ldl -fPIC -rdynamic
+flags = -g -Wall -lm -ldl -fPIC -rdynamic -L./extlib/. -ljson -I./extlib/libjson/src/include
 
 
 $(exec): $(objects)
+	cd extlib/libjson && make && cp *.a ../.
 	gcc $(objects) $(flags) -o $(exec)
 
 libgpp.a: $(objects)

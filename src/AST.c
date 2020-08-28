@@ -25,6 +25,10 @@ AST_T* init_ast(int type)
     ast->result = 0;
     ast->interpreter_path = 0;
     ast->comment_value = 0;
+    ast->object_vars = 0;
+    ast->object_vars_size = 0;
+    ast->left = 0;
+    ast->right = 0;
 
     ast->buffered = 0;
 
