@@ -1,16 +1,12 @@
 #include "include/visitor.h"
 #include "include/main.h"
 #include "include/io.h"
+#include "include/utils.h"
+#include "include/AST_utils.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-
-void assert_not_nil(void* x, const char* msg)
-{
-    if (!!x) return;
-    printf("ASSERT FAILED. ITEM IS NIL (%p) - %s\n", x, msg);
-}
 
 static char* charstr(char c)
 {
@@ -268,7 +264,6 @@ AST_T* visitor_visit_int(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
 
 AST_T* step_left_lookup (visitor_T* visitor, AST_T* node, char* varname, int argc, AST_T** argv)
 {
-    printf("%s %p!\n", ast_to_string(node), node->left);
     AST_T* var = obj_var_lookup(node, varname);
     if (var) return var;
 
@@ -326,8 +321,6 @@ AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
         }
     }
 
-    
-
     printf("[Visitor.visit_var]: `%s` is not defined.\n", node->var_name);
     exit(1);
 }
@@ -345,7 +338,8 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
             return node;
 
 
-        AST_T* iterable = ((AST_T*)args[0])->type == AST_VAR ? visitor_visit(visitor, args[0], argc, argv) : ((AST_T*)args[0]);
+        int iterable_type = ((AST_T*)args[0])->type;
+        AST_T* iterable = (iterable_type == AST_VAR || iterable_type == AST_CALL) ? visitor_visit(visitor, args[0], argc, argv) : ((AST_T*)args[0]);
         AST_T* mapping = (AST_T*) args[1];
 
         for (int i = 0; i < (int)iterable->group_items_size; i++)
@@ -412,8 +406,8 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
         if (args_size < 2)
             return node;
 
-        AST_T* ast_index = (AST_T*) args[0];
-        AST_T* object = (AST_T*) visitor_visit(visitor, args[1], argc, argv);
+        AST_T* object = (AST_T*) visitor_visit(visitor, args[0], argc, argv);
+        AST_T* ast_index = (AST_T*) args[1];
 
         if (object->object_vars_size >= ast_index->int_value)
         {
@@ -423,14 +417,14 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
 
             return visitor_visit(visitor, string, argc, argv);
         }
-    }
-    if (strcmp(node->var_name, "value") == 0)
+    } 
+    else if (strcmp(node->var_name, "value") == 0)
     {
         if (args_size < 2)
             return node;
 
-        AST_T* ast_index = (AST_T*) args[0];
-        AST_T* object = (AST_T*) visitor_visit(visitor, args[1], argc, argv);
+        AST_T* object = (AST_T*) visitor_visit(visitor, args[0], argc, argv);
+        AST_T* ast_index = (AST_T*) args[1];
 
         if (object->object_vars_size >= ast_index->int_value)
         {
@@ -440,15 +434,56 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
                 return visitor_visit(visitor, var->var_value, argc, argv);
         }
     }
+    else
+    if (strcmp(node->var_name, "get") == 0)
+    {
+        if (args_size < 2)
+            return node;
+
+        AST_T* object = (AST_T*) visitor_visit(visitor, args[0], argc, argv);
+        AST_T* ast_key = (AST_T*) args[1];
+        AST_T* value = 0;
+
+        if (object->type == AST_OBJECT)
+        {
+            value = ast_object_get_value_by_key(object, ast_key->string_value);
+        }
+        else
+        if (object->type == AST_GROUP)
+        {
+            value = ast_group_get_value_by_index(object, ((int)ast_key->float_value));
+        }
+
+        if (value)
+            return visitor_visit(visitor, value, argc, argv);
+    }
+    else
+    if (strcmp(node->var_name, "keys") == 0)
+    {
+        if (!args_size)
+            return node;
+
+        AST_T* object = (AST_T*) visitor_visit(visitor, args[0], argc, argv);
+        AST_T* value = 0;
+
+        if (object->type == AST_OBJECT)
+            value = ast_object_get_keys(object);
+
+        /** Might implement this some time
+        * else
+        * if (object->type == AST_GROUP)
+        * {
+        * } **/
+
+        if (value)
+            return visitor_visit(visitor, value, argc, argv);
+    }
 
     return node;
 }
 
 AST_T* visitor_visit_group(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
-    for (int i = 0; i < (int) node->group_items_size; i++)
-        visitor_visit(visitor, node->group_items[i], argc, argv);
-
     return node;
 }
 

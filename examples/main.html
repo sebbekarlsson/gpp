@@ -12,7 +12,7 @@
             </span>
             <h3>Mapping a list to HTML</h3>
             <ul>
-               {{ map (["apple" "banana" "pear" "orange"]  (@<li>{{ $0 }}</li>@)) }}
+               {{ map (["apple", "banana", "pear", "orange"], (@<li>{{ $0 }}</li>@)) }}
             </ul>
         </section>
         <h2>Integrating other languages</h2>

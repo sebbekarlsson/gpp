@@ -13,7 +13,7 @@
             should be evaluated "lazy".
 
     ( ) = ** List **
-          - A list of elements, separated by newline or space.
+          - A list of elements, separated by comma.
           - Aliases: [ ]
 
     map = ** Built-in function **
@@ -33,6 +33,21 @@
 
     floor = ** Built-in function **
           - Floors a number. For example, the input 60.6 would return 60.
+
+    key = ** Built-in function **
+          - Extract a key by index from an object.
+            The signature is:
+            key (object index)
+
+    value = ** Built-in function **
+          - Extract a value by index from an object.
+            The signature is:
+            value (object index)
+
+    get = ** Built-in function **
+          - Extract a value by index or key from an object or list.
+            The signature is:
+            value ((object || list) (index || key))
 
     $ = ** Positional parameter constant **
           - This is heavily inspired by the shell, it allows you to access
@@ -56,7 +71,7 @@
 
             <h3>Mapping a list to HTML</h3>
             <ul>
-               {{ map (["apple" "banana" "pear" "orange"]  (@<li>{{ $0 }}</li>@)) }}
+               {{ map (["apple", "banana", "pear","orange"], (@<li>{{ $0 }}</li>@)) }}
             </ul>
 
             <h3>Dumping out file contents</h3>
@@ -142,7 +157,7 @@ console.log(["john", "sarah", "anna"]
 <html>
     <title>{{ title }}</title>
     <body>
-        {{ map (favouriteFruits  (@<li>{{ $0 }}</li>@)) }}
+        {{ map (favouriteFruits, (@<li>{{ $0 }}</li>@)) }}
     </body>
 </html>
 ```

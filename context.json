@@ -2,5 +2,13 @@
     "names": ["Not", "Made", "with", "Coffee", "and", "Love", "in", "San", "Francisco"],
     "xyz": {
         "someValue": { "otherValue": 1 }
+    },
+    "abc": {
+        "name": "john"
+    },
+    "score": {
+        "john": 128,
+        "sarah": 356,
+        "anna": 70
     }
 }

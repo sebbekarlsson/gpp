@@ -25,7 +25,7 @@ token_T* parser_eat(parser_T* parser, int type)
     }
     else
     {
-        printf("[Parser.eat]: Unexpected `%s` `%s`\n", token_to_str(parser->token), parser->token->value);
+        printf("[Parser.eat]: Unexpected (`%s` `%s`)\nWas expecting `%d`\n", token_to_str(parser->token), parser->token->value, type);
         exit(1);
     }
 }
@@ -161,7 +161,7 @@ AST_T* parser_parse_id(parser_T* parser, AST_T* parent)
 
         return ast_call;
     }
-    
+   
     AST_T* ast = init_ast(AST_VAR);
     ast->var_name = var_name;
     ast->var_value = (void*)0;
@@ -230,9 +230,26 @@ AST_T* parser_parse_group(parser_T* parser, AST_T* parent)
     }
 
     AST_T* ast = init_ast(AST_GROUP);
-    
-    while (parser->token->type != (is_bracket ? TOKEN_RBRACKET : TOKEN_RPAREN) && parser->token->type != TOKEN_EOF)
+
+    AST_T* item = parser_parse_expr(parser, parent);
+
+    ast->group_items_size += 1;
+
+    if (ast->group_items == (void*) 0)
     {
+        ast->group_items = calloc(1, sizeof(struct AST_STRUCT*));
+        ast->group_items[0] = item;
+    }
+    else
+    {
+        ast->group_items = realloc(ast->group_items, sizeof(struct AST_STRUCT*) * ast->group_items_size);
+        ast->group_items[ast->group_items_size-1] = item;
+    }
+
+    while (parser->token->type == TOKEN_COMMA)
+    {
+        parser_eat(parser, TOKEN_COMMA);
+
         AST_T* item = parser_parse_expr(parser, parent);
 
         ast->group_items_size += 1;

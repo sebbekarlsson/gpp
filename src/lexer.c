@@ -58,9 +58,8 @@ token_T* lexer_parse_left_paren(lexer_T* lexer) {
 }
 
 token_T* lexer_parse_right_paren(lexer_T* lexer) {
-    lexer_advance(lexer);
-
-    return init_token(charstr(lexer->c), TOKEN_RPAREN); 
+    char* value = charstr(lexer->c);
+    return init_token(value, TOKEN_RPAREN); 
 }
 
 token_T* lexer_parse_id(lexer_T* lexer)
@@ -74,6 +73,7 @@ token_T* lexer_parse_id(lexer_T* lexer)
         strcat(value, charstr(lexer->c));
         lexer_advance(lexer);
     } while (lexer->c != '\0' && (isalpha(lexer->c) || isdigit(lexer->c)));
+
 
     return init_token(value, TOKEN_ID);
 }
@@ -165,7 +165,7 @@ token_T* lexer_parse_any(lexer_T* lexer)
             lexer_advance(lexer);
         }
     }
-    
+
     return init_token(value, TOKEN_STRING);
 }
 
@@ -333,6 +333,7 @@ token_T* lexer_next_token(lexer_T* lexer)
            case ']': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_RBRACKET)); break;
            case '#': return lexer_parse_comment(lexer); break;
            case '.': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_DOT)); break;
+           case ',': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_COMMA)); break;
            default: return lexer_parse_raw(lexer, 1); break;
        } 
     }
