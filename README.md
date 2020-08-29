@@ -239,10 +239,6 @@ make
 
 ## FAQ
 ```
-How is this software licensed?
-```
-> I don't know. Do what you want.
-```
 If I define a variable in my Python code,
 how can I later access it in my NodeJS block
 below?
