@@ -25,6 +25,8 @@ AST_T* visitor_visit_assign(visitor_T* visitor, AST_T* node, int argc, AST_T** a
 
 AST_T* visitor_visit_string(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
 
+AST_T* visitor_visit_comment(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
+
 AST_T* visitor_visit_float(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
 
 AST_T* visitor_visit_int(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);

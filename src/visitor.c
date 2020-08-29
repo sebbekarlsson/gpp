@@ -3,6 +3,7 @@
 #include "include/io.h"
 #include "include/utils.h"
 #include "include/AST_utils.h"
+#include "include/lexer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -126,7 +127,7 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
         case AST_CALL: return visitor_visit_call(visitor, node, argc, argv); break;
         case AST_GROUP: return visitor_visit_group(visitor, node, argc, argv); break;
         case AST_OBJECT: return visitor_visit_object(visitor, node, argc, argv); break;
-        case AST_COMMENT: return init_ast(AST_NOOP); break;
+        case AST_COMMENT: return visitor_visit_comment(visitor, node, argc, argv); break;
         default: printf("[Visitor]: Unhandled node of type `%d`\n", node->type); exit(1); break;
     }
     return init_ast(AST_NOOP);
@@ -159,10 +160,20 @@ AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
 
                 if (comment)
                 {
-                    char* value = sh(comment->comment_value, node->result);
-                    visitor_buffer(visitor, value);
-                    free(value);
-                    return node;
+                    char* comment_value = comment->comment_value;
+
+                    if (comment_value[0] == '%')
+                    {
+                        printf("ugh\n");
+                        // silence
+                    }
+                    else
+                    {
+                        char* value = sh(comment_value, node->result);
+                        visitor_buffer(visitor, value);
+                        free(value);
+                        return node;
+                    }
                 }
             }
         }
@@ -187,14 +198,23 @@ AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
 
                 if (comment)
                 {
-                    gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0);
-                    char* value = sh(comment->comment_value, gpp_res->res);
-                    visitor_buffer(visitor, value);
-                    free(value);
-                    free(gpp_res->res);
-                    free(gpp_res->node);
-                    free(gpp_res);
-                    return node;
+                    char* comment_value = comment->comment_value;
+
+                    if (comment_value[0] == '%')
+                    {
+                        return visitor_visit_comment(visitor, comment, argc, argv);
+                    }
+                    else
+                    {
+                        gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0);
+                        char* value = sh(comment_value, gpp_res->res);
+                        visitor_buffer(visitor, value);
+                        free(value);
+                        free(gpp_res->res);
+                        free(gpp_res->node);
+                        free(gpp_res);
+                        return node;
+                    } 
                 }
             }
 
@@ -236,6 +256,41 @@ AST_T* visitor_visit_assign(visitor_T* visitor, AST_T* node, int argc, AST_T** a
 AST_T* visitor_visit_string(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
     visitor_buffer(visitor, node->string_value);
+
+    return node;
+}
+
+AST_T* visitor_visit_comment(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
+{
+    char* comment_value = node->comment_value;
+
+    if (comment_value[0] != '%')
+        return node;
+
+    lexer_T* lexer = init_lexer(comment_value, 0);
+
+    token_T* tok = 0;
+    char* operation = 0;
+    char* value = 0;
+    while ((tok = lexer_next_token(lexer))->type != TOKEN_EOF)
+    {
+        if (tok->value[0] == '%')
+            continue;
+
+        if (tok->type == TOKEN_ID)
+            operation = tok->value;
+
+        if (tok->type == TOKEN_STRING)
+            value = tok->value;
+
+        if (operation && value)
+            break;
+    }
+
+    if (operation && value)
+    {
+        // TODO perform operation
+    }
 
     return node;
 }
