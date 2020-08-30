@@ -29,8 +29,13 @@ AST_T* init_ast(int type)
     ast->object_vars_size = 0;
     ast->left = 0;
     ast->right = 0;
+    ast->is_block = 0;
+    ast->comments = 0;
+    ast->comments_size = 0;
 
     ast->buffered = 0;
+    ast->skip = 0;
+    ast->skip_comments = 0;
 
     return ast;
 }
@@ -86,8 +91,24 @@ static char* ast_raw_to_string(AST_T* ast)
     return val;
 }
 
+static char* ast_root_to_string(AST_T* ast)
+{
+    const char* template = "AST_ROOT %p";
+    char* val = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(val, template, ast);
+
+    return val;
+}
+
 char* ast_to_string(AST_T* ast)
 {
+    if (!ast)
+    {
+        char* str = calloc(5, sizeof(char));
+        strcpy(str, "NULL");
+        return str;
+    }
+
     switch (ast->type)
     {
         case AST_STRING: return ast_string_to_string(ast); break;
@@ -95,6 +116,7 @@ char* ast_to_string(AST_T* ast)
         case AST_COMMENT: return ast_comment_to_string(ast); break;
         case AST_COMP: return ast_comp_to_string(ast); break;
         case AST_RAW: return ast_raw_to_string(ast); break;
+        case AST_ROOT: return ast_root_to_string(ast); break;
         default: return ast_default_to_string(ast); break;
     }
 }

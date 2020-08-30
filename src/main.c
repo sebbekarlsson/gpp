@@ -23,11 +23,11 @@ gpp_result_T* init_gpp_result(char* res, AST_T* node)
     return result;
 }
 
-gpp_result_T* gpp_eval(char* source, unsigned int force_raw, unsigned int lazy)
+gpp_result_T* gpp_eval(char* source, unsigned int lazy, AST_T* parent)
 {
-    lexer_T* lexer = init_lexer(source, force_raw);
+    lexer_T* lexer = init_lexer(source);
     parser_T* parser = init_parser(lexer);
-    AST_T* root = parser_parse(parser, (void*)0);
+    AST_T* root = parser_parse(parser, parent);
     char* res = 0;
 
     if (!lazy)

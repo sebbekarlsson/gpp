@@ -15,11 +15,10 @@ typedef struct LEXER_STRUCT {
     char* src;
     unsigned int raw;
     unsigned int comp;
-    unsigned int force_raw;
     unsigned int raws;
 } lexer_T;
 
-lexer_T* init_lexer(char* src, unsigned int force_raw);
+lexer_T* init_lexer(char* src);
 
 void lexer_advance(lexer_T* lexer);
 
@@ -39,7 +38,7 @@ token_T* lexer_parse_comment(lexer_T* lexer);
 token_T* lexer_parse_comp(lexer_T* lexer);
 token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all);
 
-token_T* lexer_next_token_c(lexer_T* lexer);
+token_T* lexer_next_token_simple(lexer_T* lexer);
 token_T* lexer_next_token(lexer_T* lexer);
 
 char lexer_peek(lexer_T* lexer, unsigned int index);

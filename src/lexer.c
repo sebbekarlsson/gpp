@@ -13,7 +13,7 @@ static char* charstr(char c)
     return new_str;
 }
 
-lexer_T* init_lexer(char* src, unsigned int force_raw)
+lexer_T* init_lexer(char* src)
 {
     lexer_T* lexer = (lexer_T*) calloc(1, sizeof(struct LEXER_STRUCT));
     lexer->src = (char*) calloc(strlen(src) + 1, sizeof(char));
@@ -23,7 +23,6 @@ lexer_T* init_lexer(char* src, unsigned int force_raw)
     lexer->len = strlen(lexer->src);
     lexer->raw = 1;
     lexer->comp = 0;
-    lexer->force_raw = force_raw;
     lexer->raws = 0;
 
     return lexer;
@@ -291,6 +290,40 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
     return init_token(value, TOKEN_RAW);
 }
 
+static token_T* lexer_char_to_token(lexer_T* lexer)
+{
+    switch (lexer->c)
+    {
+       case '(': return lexer_parse_left_paren(lexer); break;
+       case ')': return lexer_advance_token(lexer, lexer_parse_right_paren(lexer)); break;
+       case '=': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_EQUALS)); break;
+       case '"': return lexer_advance_token(lexer, lexer_parse_string(lexer)); break;
+       case '[': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_LBRACKET)); break;
+       case ']': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_RBRACKET)); break;
+       case '#': return lexer_parse_comment(lexer); break;
+       case '.': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_DOT)); break;
+       case ',': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_COMMA)); break;
+       default: return lexer_parse_raw(lexer, 1); break;
+   }
+}
+
+token_T* lexer_next_token_simple(lexer_T* lexer)
+{
+    while (lexer->c != '\0')
+    {
+        lexer_skip_whitespace(lexer);
+
+        while (lexer->c == '%')
+            lexer_advance(lexer);
+
+        if (isalpha(lexer->c) || lexer->c == '$') return lexer_parse_id(lexer);
+
+        return lexer_char_to_token(lexer);
+    }
+    
+    return init_token(charstr(lexer->c), TOKEN_EOF);
+}
+
 token_T* lexer_next_token(lexer_T* lexer)
 {
     while (lexer->c != '\0') 
@@ -323,19 +356,7 @@ token_T* lexer_next_token(lexer_T* lexer)
        if (isdigit(lexer->c)) return lexer_parse_number(lexer);
        if (isalpha(lexer->c) || lexer->c == '$') return lexer_parse_id(lexer);
 
-       switch (lexer->c)
-       {
-           case '(': return lexer_parse_left_paren(lexer); break;
-           case ')': return lexer_advance_token(lexer, lexer_parse_right_paren(lexer)); break;
-           case '=': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_EQUALS)); break;
-           case '"': return lexer_advance_token(lexer, lexer_parse_string(lexer)); break;
-           case '[': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_LBRACKET)); break;
-           case ']': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_RBRACKET)); break;
-           case '#': return lexer_parse_comment(lexer); break;
-           case '.': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_DOT)); break;
-           case ',': return lexer_advance_token(lexer, init_token(charstr(lexer->c), TOKEN_COMMA)); break;
-           default: return lexer_parse_raw(lexer, 1); break;
-       } 
+       return lexer_char_to_token(lexer); 
     }
 
     return init_token(charstr(lexer->c), TOKEN_EOF);

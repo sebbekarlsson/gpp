@@ -21,6 +21,41 @@ AST_T* ast_object_get_value_by_key(AST_T* ast_object, const char* key)
     return 0;
 }
 
+unsigned int ast_object_has_var(AST_T* ast_object, const char* key)
+{
+    assert_not_nil(ast_object, "ast_object is nil\n");
+
+    for (int i = 0; i < (int) ast_object->object_vars_size; i++)
+    {
+        AST_T* var = ast_object->object_vars[i];
+
+        if (strcmp(var->var_name, key) == 0)
+        {
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+AST_T* ast_object_redefine_var(AST_T* ast_object, const char* key, AST_T* value)
+{
+    assert_not_nil(ast_object, "ast_object is nil\n");
+
+    for (int i = 0; i < (int) ast_object->object_vars_size; i++)
+    {
+        AST_T* var = ast_object->object_vars[i];
+
+        if (strcmp(var->var_name, key) == 0)
+        {
+            ast_object->object_vars[i]->var_value = value;
+            return ast_object->object_vars[i];
+        }
+    }
+
+    return value;
+}
+
 AST_T* ast_object_get_keys(AST_T* ast_object)
 {
     assert_not_nil(ast_object, "ast_object is nil\n");
@@ -50,6 +85,27 @@ AST_T* ast_object_get_keys(AST_T* ast_object)
     }
 
     return ast;
+}
+
+AST_T* ast_object_push_var(AST_T* ast_object, AST_T* ast_var)
+{
+    assert_not_nil(ast_object, "ast_object is nil\n");
+    assert_not_nil(ast_var, "ast_var is nil\n");
+
+    ast_object->object_vars_size += 1;
+
+    if (ast_object->object_vars == (void*) 0)
+    {
+        ast_object->object_vars = calloc(1, sizeof(struct AST_STRUCT*));
+        ast_object->object_vars[0] = ast_var;
+    }
+    else
+    {
+        ast_object->object_vars = realloc(ast_object->object_vars, sizeof(struct AST_STRUCT*) * ast_object->object_vars_size);
+        ast_object->object_vars[ast_object->object_vars_size-1] = ast_var;
+    }
+
+    return ast_var;
 }
 
 AST_T* ast_group_get_value_by_index(AST_T* ast_group, int index)

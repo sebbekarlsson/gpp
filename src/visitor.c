@@ -3,6 +3,7 @@
 #include "include/io.h"
 #include "include/utils.h"
 #include "include/AST_utils.h"
+#include "include/lexer.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -126,7 +127,7 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
         case AST_CALL: return visitor_visit_call(visitor, node, argc, argv); break;
         case AST_GROUP: return visitor_visit_group(visitor, node, argc, argv); break;
         case AST_OBJECT: return visitor_visit_object(visitor, node, argc, argv); break;
-        case AST_COMMENT: return init_ast(AST_NOOP); break;
+        case AST_COMMENT: return visitor_visit_comment(visitor, node, argc, argv); break;
         default: printf("[Visitor]: Unhandled node of type `%d`\n", node->type); exit(1); break;
     }
     return init_ast(AST_NOOP);
@@ -134,14 +135,116 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 
 AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
-    for (int i = 0; i < (int)node->root_items_size; i++)
-        visitor_visit(visitor, node->root_items[i], argc, argv);
+    AST_T* extend_root = 0;
+    unsigned int skip = node->skip;
+
+    if (!node->skip_comments)
+    {
+        for (int i = 0; i < (int)node->root_items_size; i++)
+        {
+            AST_T* comment = node->root_items[i];
+
+            if (comment->type != AST_COMMENT)
+                continue;
+
+            char* comment_value = comment->comment_value;
+
+            if (comment_value[0] == '%')
+            {
+                lexer_T* lexer = init_lexer(comment_value);
+                token_T* tok = 0;
+
+                char* op = 0;
+                char* val = 0;
+                while ((tok = lexer_next_token_simple(lexer))->type != TOKEN_EOF)
+                {
+                    if (tok->type == TOKEN_ID)
+                    {
+                        op = tok->value;
+                        tok = lexer_next_token_simple(lexer);
+                    }
+                    if (tok->type == TOKEN_ID || tok->type == TOKEN_STRING)
+                    {
+                        val = tok->value;
+                    }
+
+                    if (op && val)
+                        break;
+                }
+
+                if (op && val)
+                {
+                    if (strcmp(op, "block") == 0)
+                    {
+                        if (ast_object_has_var(visitor->object, val))
+                        {
+                            AST_T* var_value = ast_object_get_value_by_key(visitor->object, val);
+                            var_value->skip_comments = 1;
+                            return visitor_visit(visitor, var_value, argc, argv);
+                        }
+
+                        gpp_result_T* gpp_res = gpp_eval(node->raw_value, 1, 0);
+                    
+                        AST_T* var = init_ast(AST_VAR);
+                        var->var_name = calloc(strlen(val) + 1, sizeof(char));
+                        var->var_value = gpp_res->node;
+                        strcpy(var->var_name, val);
+                        ast_object_push_var(visitor->object, var);
+                        free(gpp_res);
+
+                        skip = 1;
+                    }
+                    else
+                    if (strcmp(op, "extends") == 0)
+                    {
+                        gpp_result_T* gpp_res = gpp_eval(gpp_read_file(val), 1, 0);
+                        extend_root = gpp_res->node;
+                        free(gpp_res);
+                    }
+                }
+            }
+            else
+            {
+                if (node->raw_value && comment)
+                {
+                    gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0);
+
+                    char* value = sh(comment->comment_value, gpp_res->res);
+                    visitor_buffer(visitor, value);
+                    free(value);
+                    free(gpp_res->res);
+                    free(gpp_res->node);
+                    free(gpp_res);
+
+                    return node;
+                }
+            } 
+        }
+    } 
+
+    if (!skip)
+    {
+        for (int i = 0; i < (int)node->root_items_size; i++)
+        {
+            AST_T* child = node->root_items[i];
+
+            if (child->type == AST_COMMENT)
+                continue;
+            
+            visitor_visit(visitor, child, argc, argv);
+        }
+    }
+
+    if (extend_root)
+        return visitor_visit(visitor, extend_root, argc, argv);
 
     return node;
 }
 
 AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
+    assert_not_reached();
+
     if (node->result)
     {
         if (node->raw_child)
@@ -159,7 +262,8 @@ AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
 
                 if (comment)
                 {
-                    char* value = sh(comment->comment_value, node->result);
+                    char* comment_value = comment->comment_value;
+                    char* value = sh(comment_value, node->result);
                     visitor_buffer(visitor, value);
                     free(value);
                     return node;
@@ -187,8 +291,10 @@ AST_T* visitor_visit_raw(visitor_T* visitor, AST_T* node, int argc, AST_T** argv
 
                 if (comment)
                 {
+                    char* comment_value = comment->comment_value;
+
                     gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0);
-                    char* value = sh(comment->comment_value, gpp_res->res);
+                    char* value = sh(comment_value, gpp_res->res);
                     visitor_buffer(visitor, value);
                     free(value);
                     free(gpp_res->res);
@@ -237,6 +343,11 @@ AST_T* visitor_visit_string(visitor_T* visitor, AST_T* node, int argc, AST_T** a
 {
     visitor_buffer(visitor, node->string_value);
 
+    return node;
+}
+
+AST_T* visitor_visit_comment(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
+{
     return node;
 }
 
