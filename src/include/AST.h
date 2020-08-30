@@ -45,10 +45,17 @@ typedef struct AST_STRUCT {
     struct AST_STRUCT** object_vars;
     size_t object_vars_size;
 
+    struct AST_STRUCT** comments;
+    size_t comments_size;
+
     struct AST_STRUCT* left;
     struct AST_STRUCT* right;
 
+    unsigned int is_block;
+
     unsigned int buffered;
+    unsigned int skip;
+    unsigned int skip_comments;
     char* result;
 } AST_T;
 

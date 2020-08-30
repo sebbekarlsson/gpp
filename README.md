@@ -139,6 +139,43 @@ console.log(["john", "sarah", "anna"]
 ```html
 <p> "hello" </p>
 ```
+### Extending / Inheritance
+> You can make templates inherit / extend other templates.  
+> Here is how a parent template could look like: (`parent.hml`)
+```html
+<html>
+    <head>
+        <title>(@#%block title @)</title>
+    </head>
+    <body>
+        (@#%block body @)
+    </body>
+</html>
+```
+> Notise the `%` at the start of the comment.  
+> And then you can write a child template that inherits from this one  
+> Like this: (`child.html`)
+```html
+#%extends "parent.html"
+
+(@#%block title
+    My Title
+@)
+
+(@#%block body
+    Welcome to my website
+@)
+```
+> Also, notice here the `%` at the start of each comment.  
+> If you run `gpp` over `child.html` now, the output will be:
+```html
+<html>
+    <head>
+        <title>My Title</title>
+    </head>
+    <body>Welcome to my website</body>
+</html>
+```
 
 ## Loading data
 > What is a templating engine without any data to work with?  
