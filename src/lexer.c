@@ -16,8 +16,19 @@ static char* charstr(char c)
 lexer_T* init_lexer(char* src)
 {
     lexer_T* lexer = (lexer_T*) calloc(1, sizeof(struct LEXER_STRUCT));
-    lexer->src = (char*) calloc(strlen(src) + 1, sizeof(char));
-    strcpy(lexer->src, src);
+
+    if (src)
+    {
+        lexer->src = (char*) calloc(strlen(src) + 1, sizeof(char));
+        strcpy(lexer->src, src);
+    }
+    else
+    {
+        lexer->src = (char*) calloc(2, sizeof(char));
+        lexer->src[0] = '\0';
+        lexer->src[1] = '\0';
+    }
+
     lexer->i = 0;
     lexer->c = lexer->src[lexer->i];
     lexer->len = strlen(lexer->src);
