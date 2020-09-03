@@ -34,20 +34,14 @@ gpp_result_T* gpp_eval(char* source, unsigned int lazy, AST_T* parent)
     {
         AST_T* context_object = gpp_load_context();
         visitor_T* visitor = init_visitor(context_object);
-        visitor_visit(visitor, root, 0, (void*)0);
+        AST_T* resroot = visitor_visit(visitor, root, 0, 0);
 
-        if (visitor->buffer)
-        {
-            res = (char*) calloc(strlen(visitor->buffer) + 1, sizeof(char));
-            strcpy(res, visitor->buffer);
-        }
+        res = ast_to_string(resroot);
 
-        free(visitor->buffer);
         free(visitor);
     }
 
     free(lexer);
-    
 
     return init_gpp_result(res, root);
 }

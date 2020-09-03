@@ -139,6 +139,25 @@ console.log(["john", "sarah", "anna"]
 ```html
 <p> "hello" </p>
 ```
+#### Arrow functions
+> You can also define functions to render data,  
+> Here is an example of creating a function to render a `<ul>` list:
+```jsx
+{{
+    itemList = (items) => map (items, (@
+        <li>{{ $0 }}</li>
+    @))
+}}
+
+{{  itemList (["hello", "world"]) }}
+```
+> This will render as:
+```html
+<ul>
+    <li>hello</li>
+    <li>world</li>
+</ul>
+```
 ### Extending / Inheritance
 > You can make templates inherit / extend other templates.  
 > Here is how a parent template could look like: (`parent.hml`)
@@ -267,6 +286,7 @@ make
 > If you feel like you could help implement some of them, feel free
 > to make a pull-request.   
 - [ ] Write better documentation
+- [ ] Implement a step-by-step debugger
 - [ ] Create a shared library to allow the use of this in other languages
 - [ ] Implement bindings for NodeJS 
 - [ ] Implement bindings for Python  

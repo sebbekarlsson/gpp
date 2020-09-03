@@ -36,6 +36,8 @@ AST_T* init_ast(int type)
     ast->buffered = 0;
     ast->skip = 0;
     ast->skip_comments = 0;
+    ast->function_body = 0;
+    ast->function_args = 0;
 
     return ast;
 }
@@ -58,10 +60,15 @@ static char* ast_var_to_string(AST_T* ast)
 
 static char* ast_comment_to_string(AST_T* ast)
 {
-    char* value = (char*) calloc(strlen(ast->comment_value) + 1, sizeof(char));
+    /*char* value = (char*) calloc(strlen(ast->comment_value) + 1, sizeof(char));
     strcpy(value, ast->comment_value);
 
-    return value;
+    return value;*/
+
+    char* str = (char*) calloc(1, sizeof(char));
+    str[0] = '\0';
+
+    return str;
 }
 
 static char* ast_default_to_string(AST_T* ast)
@@ -75,27 +82,80 @@ static char* ast_default_to_string(AST_T* ast)
 
 static char* ast_comp_to_string(AST_T* ast)
 {
-    const char* template = "AST_COMP %p";
-    char* val = calloc(strlen(template) + 128, sizeof(char));
-    sprintf(val, template, ast);
+    char* val = (char*) calloc(1, sizeof(char));
+    val[0] = '\0';
+
+    for (int i = 0; i < (int) ast->group_items_size; i++)
+    {
+        char* res = ast_to_string(ast->group_items[i]);
+        val = (char*) realloc(val, (strlen(val) + strlen(res) + 1) * sizeof(char));
+        strcat(val, res);
+    }
 
     return val;
 }
 
-static char* ast_raw_to_string(AST_T* ast)
+static char* ast_group_to_string(AST_T* ast)
 {
-    const char* template = "AST_RAW %p";
-    char* val = calloc(strlen(template) + 128, sizeof(char));
-    sprintf(val, template, ast);
+    char* val = (char*) calloc(1, sizeof(char));
+    val[0] = '\0';
+
+    for (int i = 0; i < (int) ast->group_items_size; i++)
+    {
+        char* res = ast_to_string(ast->group_items[i]);
+        val = (char*) realloc(val, (strlen(val) + strlen(res) + 1) * sizeof(char));
+        strcat(val, res);
+    }
 
     return val;
 }
 
 static char* ast_root_to_string(AST_T* ast)
 {
-    const char* template = "AST_ROOT %p";
+    char* val = (char*) calloc(1, sizeof(char));
+    val[0] = '\0';
+
+    for (int i = 0; i < (int) ast->root_items_size; i++)
+    {
+        char* res = ast_to_string(ast->root_items[i]);
+        val = (char*) realloc(val, (strlen(val) + strlen(res) + 1) * sizeof(char));
+        strcat(val, res);
+    }
+
+    return val;
+}
+
+static char* ast_call_to_string(AST_T* ast)
+{
+    const char* template = "CALL `%s`";
+    char* str = calloc(strlen(template) + strlen(ast->var_name) + 8, sizeof(char));
+    sprintf(str, template, ast->var_name);
+
+    return str;
+}
+
+static char* ast_function_to_string(AST_T* ast)
+{
+    char* str = (char*) calloc(1, sizeof(char));
+    str[0] = '\0';
+
+    return str;
+}
+
+static char* ast_int_to_string(AST_T* ast)
+{
+    const char* template = "%d";
     char* val = calloc(strlen(template) + 128, sizeof(char));
-    sprintf(val, template, ast);
+    sprintf(val, template, ast->int_value);
+
+    return val;
+}
+
+static char* ast_float_to_string(AST_T* ast)
+{
+    const char* template = "%12.6f";
+    char* val = calloc(strlen(template) + 128, sizeof(char));
+    sprintf(val, template, ast->float_value);
 
     return val;
 }
@@ -112,11 +172,15 @@ char* ast_to_string(AST_T* ast)
     switch (ast->type)
     {
         case AST_STRING: return ast_string_to_string(ast); break;
+        case AST_INT: return ast_int_to_string(ast); break;
+        case AST_FLOAT: return ast_float_to_string(ast); break;
         case AST_VAR: return ast_var_to_string(ast); break;
         case AST_COMMENT: return ast_comment_to_string(ast); break;
         case AST_COMP: return ast_comp_to_string(ast); break;
-        case AST_RAW: return ast_raw_to_string(ast); break;
         case AST_ROOT: return ast_root_to_string(ast); break;
+        case AST_GROUP: return ast_group_to_string(ast); break;
+        case AST_CALL: return ast_call_to_string(ast); break;
+        case AST_FUNCTION: return ast_function_to_string(ast); break;
         default: return ast_default_to_string(ast); break;
     }
 }

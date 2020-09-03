@@ -1,0 +1,7 @@
+{{
+    itemList = (items) => map (items, (@
+        <li>{{ $0 }}</li>
+    @))
+}}
+
+{{  itemList (["hello", "world"]) }}

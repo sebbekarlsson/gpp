@@ -154,6 +154,15 @@ token_T* lexer_parse_comment(lexer_T* lexer)
     return init_token(value, TOKEN_COMMENT);
 }
 
+token_T* lexer_parse_arrow_right(lexer_T* lexer)
+{
+    token_T* token = init_token(charstr(lexer->c), TOKEN_ARROW_RIGHT);
+    lexer_advance(lexer); // =
+    lexer_advance(lexer); // >
+
+    return token;
+}
+
 token_T* lexer_parse_any(lexer_T* lexer)
 {
     char* value = (char*) calloc(1, sizeof(char));
@@ -303,6 +312,9 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
 
 static token_T* lexer_char_to_token(lexer_T* lexer)
 {
+    if (lexer->c == '=' && lexer_peek(lexer, 1) == '>')
+        return lexer_parse_arrow_right(lexer);
+
     switch (lexer->c)
     {
        case '(': return lexer_parse_left_paren(lexer); break;

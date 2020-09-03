@@ -4,14 +4,11 @@
 
 typedef struct VISITOR_STRUCT
 {
-    char* buffer;
     AST_T* object;
     unsigned int follow_pointers;
 } visitor_T;
 
 visitor_T* init_visitor(AST_T* object);
-
-void visitor_buffer(visitor_T* visitor, char* buffstr);
 
 AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
 
@@ -32,6 +29,8 @@ AST_T* visitor_visit_float(visitor_T* visitor, AST_T* node, int argc, AST_T** ar
 AST_T* visitor_visit_int(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
 
 AST_T* visitor_visit_var(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
+
+AST_T* visitor_visit_function(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
 
 AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** argv);
 

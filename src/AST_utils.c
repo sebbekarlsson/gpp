@@ -3,6 +3,23 @@
 #include <string.h>
 #include <stdio.h>
 
+AST_T* ast_object_get_var_by_name(AST_T* ast_object, const char* key)
+{
+    assert_not_nil(ast_object, "ast_object is nil\n");
+
+    for (int i = 0; i < (int) ast_object->object_vars_size; i++)
+    {
+        AST_T* var = ast_object->object_vars[i];
+
+        if (strcmp(var->var_name, key) == 0)
+        {
+            return var;
+        }
+    }
+
+    return 0;
+}
+
 AST_T* ast_object_get_value_by_key(AST_T* ast_object, const char* key)
 {
     assert_not_nil(ast_object, "ast_object is nil\n");
@@ -116,4 +133,44 @@ AST_T* ast_group_get_value_by_index(AST_T* ast_group, int index)
         return ast_group->group_items[index];
 
     return 0;
+}
+
+AST_T* ast_group_push_item(AST_T* ast_group, AST_T* item)
+{
+    assert_not_nil(ast_group, "ast_group is nil\n");
+
+    ast_group->group_items_size += 1;
+
+    if (ast_group->group_items == (void*) 0)
+    {
+        ast_group->group_items = calloc(1, sizeof(struct AST_STRUCT*));
+        ast_group->group_items[0] = item;
+    }
+    else
+    {
+        ast_group->group_items = realloc(ast_group->group_items, sizeof(struct AST_STRUCT*) * ast_group->group_items_size);
+        ast_group->group_items[ast_group->group_items_size-1] = item;
+    }
+
+    return ast_group;
+}
+
+AST_T* ast_root_push_item(AST_T* ast_root, AST_T* item)
+{
+    assert_not_nil(ast_root, "ast_root is nil\n");
+
+    ast_root->root_items_size += 1;
+
+    if (ast_root->root_items == (void*) 0)
+    {
+        ast_root->root_items = calloc(1, sizeof(struct AST_STRUCT*));
+        ast_root->root_items[0] = item;
+    }
+    else
+    {
+        ast_root->root_items = realloc(ast_root->root_items, sizeof(struct AST_STRUCT*) * ast_root->root_items_size);
+        ast_root->root_items[ast_root->root_items_size-1] = item;
+    }
+
+    return ast_root;
 }

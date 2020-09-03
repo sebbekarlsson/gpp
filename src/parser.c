@@ -176,8 +176,28 @@ AST_T* parser_parse_assign(parser_T* parser, AST_T* parent)
     char* varname = (char*) calloc(strlen(parser->prev_token->value) + 1, sizeof(char));
     strcpy(varname, parser->prev_token->value);
     parser_eat(parser, TOKEN_EQUALS);
+    AST_T* var_value = parser_parse_expr(parser, parent);
+    
+    if (parser->token->type == TOKEN_ARROW_RIGHT)
+    {
+        if (var_value->type != AST_GROUP)
+        {
+            printf("[Parser]: Function arguments needs to be wrapped in a group.\n");
+            exit(1);
+        }
+
+        parser_eat(parser, TOKEN_ARROW_RIGHT);
+        AST_T* ast_func = init_ast(AST_FUNCTION);
+        ast_func->parent = parent;
+        ast_func->var_name = varname;
+        ast_func->function_body = parser_parse_expr(parser, ast_func);
+        ast_func->function_args = var_value;
+
+        return ast_func;
+    }
+
     AST_T* ast = init_ast(AST_ASSIGN);
-    ast->var_value = parser_parse_expr(parser, parent);
+    ast->var_value = var_value;
     ast->var_name = varname;
 
     return ast;

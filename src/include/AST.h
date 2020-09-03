@@ -5,9 +5,9 @@ typedef struct AST_STRUCT {
     enum
     {
         AST_NOOP,
-        AST_RAW,
         AST_COMP,
         AST_ASSIGN,
+        AST_FUNCTION,
         AST_FUNCTION_CALL,
         AST_STRING,
         AST_FLOAT,
@@ -50,6 +50,9 @@ typedef struct AST_STRUCT {
 
     struct AST_STRUCT* left;
     struct AST_STRUCT* right;
+
+    struct AST_STRUCT* function_body;
+    struct AST_STRUCT* function_args;
 
     unsigned int is_block;
 

@@ -35,6 +35,8 @@ token_T* lexer_parse_string(lexer_T* lexer);
 token_T* lexer_parse_number(lexer_T* lexer);
 token_T* lexer_parse_comment(lexer_T* lexer);
 
+token_T* lexer_parse_arrow_right(lexer_T* lexer);
+
 token_T* lexer_parse_comp(lexer_T* lexer);
 token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all);
 
