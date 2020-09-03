@@ -4,6 +4,7 @@
 #include "include/utils.h"
 #include "include/AST_utils.h"
 #include "include/lexer.h"
+#include "include/escape.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -600,8 +601,20 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
         if (value)
             return visitor_visit(visitor, value, argc, argv);
     }
+    else
+    if (strcmp(node->var_name, "escapehtml") == 0)
+    {
+        if (args_size < 1)
+            return node;
 
-    
+        AST_T* a = (AST_T*) visitor_visit(visitor, args[0], argc, argv);
+        char* v = ast_to_string(a);
+        AST_T* new_string = init_ast(AST_STRING);
+        new_string->string_value = escape_html(v);
+
+        return visitor_visit(visitor, new_string, argc, argv);
+    }
+
     if (!ast_object_has_var(visitor->object, node->var_name))
     {
         printf("[Visitor]: `%s` is not defined.\n", node->var_name);
