@@ -1,5 +1,7 @@
 #include "include/io.h"
 #include <errno.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 /**
@@ -11,25 +13,29 @@
  */
 char* gpp_read_file(const char* filename)
 {
-    char * buffer = 0;
-    long length;
-    FILE * f = fopen (filename, "rb");
+    FILE * fp;
+    char * line = NULL;
+    size_t len = 0;
+    ssize_t read;
 
-    if (f)
+    fp = fopen(filename, "rb");
+    if (fp == NULL)
     {
-        fseek (f, 0, SEEK_END);
-        length = ftell (f);
-        fseek (f, 0, SEEK_SET);
-        buffer = (char*) calloc(length, length);
-
-        if (buffer)
-            fread (buffer, 1, length, f);
-
-        fclose (f);
-        return buffer;
+        printf("Could not read file `%s`\n", filename);
+        exit(1);
     }
 
-    perror("error");
-    exit(2);
+    char* buffer = (char*) calloc(1, sizeof(char));
+    buffer[0] = '\0';
 
+    while ((read = getline(&line, &len, fp)) != -1) {
+        buffer = (char*) realloc(buffer, (strlen(buffer) + strlen(line) + 1) * sizeof(char));
+        strcat(buffer, line);
+    }
+
+    fclose(fp);
+    if (line)
+        free(line);
+
+    return buffer;
 }
