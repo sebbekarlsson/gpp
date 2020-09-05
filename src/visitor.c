@@ -186,7 +186,7 @@ AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
                             return visitor_visit(visitor, var_value, argc, argv);
                         }
 
-                        gpp_result_T* gpp_res = gpp_eval(node->raw_value, 1, 0);
+                        gpp_result_T* gpp_res = gpp_eval(node->raw_value, 1, 0, 0);
                     
                         AST_T* var = init_ast(AST_VAR);
                         var->var_name = calloc(strlen(val) + 1, sizeof(char));
@@ -199,7 +199,7 @@ AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
                     else
                     if (strcmp(op, "extends") == 0)
                     {
-                        gpp_result_T* gpp_res = gpp_eval(gpp_read_file(val), 1, 0);
+                        gpp_result_T* gpp_res = gpp_eval(gpp_read_file(val), 1, 0, 0);
                         extend_root = gpp_res->node;
                         free(gpp_res);
                     }
@@ -212,7 +212,7 @@ AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
             {
                 if (node->raw_value && comment)
                 {
-                    gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0);
+                    gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0, 0);
 
                     char* value = sh(comment->comment_value, gpp_res->res);
                     // visitor_buffer(visitor, value);
@@ -493,7 +493,7 @@ AST_T* visitor_visit_call(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
                 continue;
 
             char* contents = gpp_read_file(string->string_value);
-            gpp_result_T* res = gpp_eval(contents, 0, 0);
+            gpp_result_T* res = gpp_eval(contents, 0, 0, visitor->object);
 
             AST_T* ast_string = init_ast(AST_STRING);
             ast_string->string_value = calloc(strlen(res->res) + 1, sizeof(char));

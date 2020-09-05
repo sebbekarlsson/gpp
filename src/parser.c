@@ -105,7 +105,7 @@ AST_T* parser_parse_raw(parser_T* parser, AST_T* parent)
     ast->parent = parent;
     ast->raw_value = (char*) calloc(strlen(value) + 1, sizeof(char));
     strcpy(ast->raw_value, value);
-    gpp_result_T* evres = gpp_eval(ast->raw_value, 1, ast);
+    gpp_result_T* evres = gpp_eval(ast->raw_value, 1, ast, 0);
     ast->raw_child = evres->node;
     ast->result = evres->res;
     evres->node->raw_value = ast->raw_value;

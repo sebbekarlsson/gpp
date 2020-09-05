@@ -23,7 +23,7 @@ gpp_result_T* init_gpp_result(char* res, AST_T* node)
     return result;
 }
 
-gpp_result_T* gpp_eval(char* source, unsigned int lazy, AST_T* parent)
+gpp_result_T* gpp_eval(char* source, unsigned int lazy, AST_T* parent, AST_T* context)
 {
     lexer_T* lexer = init_lexer(source);
     parser_T* parser = init_parser(lexer);
@@ -32,7 +32,7 @@ gpp_result_T* gpp_eval(char* source, unsigned int lazy, AST_T* parent)
 
     if (!lazy)
     {
-        AST_T* context_object = gpp_load_context();
+        AST_T* context_object = context ? context : gpp_load_context();
         visitor_T* visitor = init_visitor(context_object);
         AST_T* resroot = visitor_visit(visitor, root, 0, 0);
 
@@ -54,7 +54,7 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    gpp_result_T* res = gpp_eval(gpp_read_file(argv[1]), 0, 0);
+    gpp_result_T* res = gpp_eval(gpp_read_file(argv[1]), 0, 0, 0);
 
     if (res->res)
         printf("%s\n", res->res);
