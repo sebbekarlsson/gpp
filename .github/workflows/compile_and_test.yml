@@ -10,8 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
       with:
-        repository: sebbekarlsson/libjson
-        path: extlib/.
+        submodules: true
     - name: make
       run: make
       #- name: install dependencies
