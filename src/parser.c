@@ -1,5 +1,5 @@
 #include "include/parser.h"
-#include "include/main.h"
+#include "include/gpp.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -98,14 +98,17 @@ AST_T* parser_parse_expr(parser_T* parser, AST_T* parent)
 AST_T* parser_parse_raw(parser_T* parser, AST_T* parent)
 {
     char* value = parser->token->value;
+    unsigned int x = parser->token->x;
 
     parser_eat(parser, TOKEN_RAW);
     
     AST_T* ast = init_ast(AST_ROOT);
+    ast->x = x;
     ast->parent = parent;
     ast->raw_value = (char*) calloc(strlen(value) + 1, sizeof(char));
     strcpy(ast->raw_value, value);
     gpp_result_T* evres = gpp_eval(ast->raw_value, 1, ast, 0);
+    evres->node->x = x;
     ast->raw_child = evres->node;
     ast->result = evres->res;
     evres->node->raw_value = ast->raw_value;

@@ -60,6 +60,9 @@ typedef struct AST_STRUCT {
     unsigned int skip;
     unsigned int skip_comments;
     char* result;
+
+    unsigned int x;
+    unsigned int y;
 } AST_T;
 
 AST_T* init_ast(int type);

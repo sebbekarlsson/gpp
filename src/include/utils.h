@@ -2,4 +2,6 @@
 #define GPP_UTILS_H
 void assert_not_nil(void* x, const char* msg);
 void assert_not_reached();
+
+char* remove_indent(char* instr, unsigned int x);
 #endif

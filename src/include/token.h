@@ -23,6 +23,8 @@ typedef struct TOKEN_STRUCT {
         TOKEN_DOT,
         TOKEN_ARROW_RIGHT,
     } type;
+    unsigned int x;
+    unsigned int y;
 } token_T;
 #endif
 

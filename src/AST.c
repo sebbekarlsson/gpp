@@ -1,4 +1,5 @@
 #include "include/AST.h"
+#include "include/utils.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -38,6 +39,9 @@ AST_T* init_ast(int type)
     ast->skip_comments = 0;
     ast->function_body = 0;
     ast->function_args = 0;
+
+    ast->x = 0;
+    ast->y = 0;
 
     return ast;
 }
@@ -120,6 +124,12 @@ static char* ast_root_to_string(AST_T* ast)
         char* res = ast_to_string(ast->root_items[i]);
         val = (char*) realloc(val, (strlen(val) + strlen(res) + 1) * sizeof(char));
         strcat(val, res);
+    }
+
+    if (ast->x) {
+      char* newstr = remove_indent(val, ast->x);
+      free(val);
+      return newstr;
     }
 
     return val;

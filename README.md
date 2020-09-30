@@ -84,22 +84,22 @@
         <section>
             <h3>I really want this list to be rendered using Python!</h3>
             <ul>
-(@#!/usr/bin/python
-for name in ["john", "sarah", "anna"]:
-    x = """(@
-        <li>
-            {}     
-        </li>
-    @)""".format(name)
-    print(x)
- @)
+            (@#!/usr/bin/python
+            for name in ["john", "sarah", "anna"]:
+                x = """(@
+                    <li>
+                        {}     
+                    </li>
+                @)""".format(name)
+                print(x)
+            @)
             </ul>
             <h3>I do want this list to be rendered in Node.js though</h3>
             <ul>
-(@#!/usr/bin/node
-console.log(["john", "sarah", "anna"]
-    .map(name => "(@<li>" + name + "</li>@)" ).join('\n'));
-@)
+            (@#!node
+            console.log(["john", "sarah", "anna"]
+              .map(name => (@ "<li>" + name + "</li>" @)).join('\n'));
+            @)
             </ul>
         </section>
     </body>
