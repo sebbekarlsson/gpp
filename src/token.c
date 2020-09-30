@@ -9,6 +9,8 @@ token_T* init_token(char* value, int type)
     token->value = (char*) calloc(strlen(value) + 1, sizeof(char));
     strcpy(token->value, value);
     token->type = type;
+    token->x = 0;
+    token->y = 0;
 
     return token;
 }

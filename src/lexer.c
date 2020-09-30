@@ -35,6 +35,8 @@ lexer_T* init_lexer(char* src)
     lexer->raw = 1;
     lexer->comp = 0;
     lexer->raws = 0;
+    lexer->x = 0;
+    lexer->y = 0;
 
     return lexer;
 }
@@ -42,6 +44,12 @@ lexer_T* init_lexer(char* src)
 void lexer_advance(lexer_T* lexer)
 {
     if (lexer->c != '\0' && lexer->i < lexer->len) {
+        if (lexer->c == '\n') {
+          lexer->y += 1;
+          lexer->x = 0;
+        } else {
+          lexer->x += 1;
+        }
         lexer->i = lexer->i + 1;
         lexer->c = lexer->src[lexer->i];
     } else {
@@ -138,9 +146,6 @@ token_T* lexer_parse_comment(lexer_T* lexer)
 {
     lexer_advance(lexer);
 
-    if (lexer->c == '!')
-        lexer_advance(lexer);
-
     char* value = (char*) calloc(1, sizeof(char));
     value[0] = '\0';
 
@@ -165,6 +170,8 @@ token_T* lexer_parse_arrow_right(lexer_T* lexer)
 
 token_T* lexer_parse_any(lexer_T* lexer)
 {
+    lexer_skip_whitespace(lexer);
+
     char* value = (char*) calloc(1, sizeof(char));
     value[0] = '\0';
 
@@ -239,20 +246,22 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
     int lcount = 0;
     int close_count = 0;
     unsigned int shift = 0;
+
+    unsigned int x = lexer->x;
     
     char* value = (char*) calloc(1, sizeof(char));
     value[0] = '\0';
     open_count += (lexer->c == VFB0 && lexer_peek(lexer, 1) == VFB1);
     close_count += (lexer->c == VFE0 && lexer_peek(lexer, 1) == VFE1);
     lcount += (lexer->c == '(');
-    
+
     while (lexer->c != '\0')
     {
         //if ((lexer->c == '{' && lexer_peek(lexer, 1) == '{'))
         //       break;
 
         if (lexer->c == '#')
-            break;
+            break; 
 
        if (!all)
        {
@@ -307,7 +316,9 @@ token_T* lexer_parse_raw(lexer_T* lexer, unsigned int all)
     lexer->raw = 0;
     lexer->raws += 1;
 
-    return init_token(value, TOKEN_RAW);
+    token_T* token = init_token(value, TOKEN_RAW);
+    token->x = x;
+    return token;
 }
 
 static token_T* lexer_char_to_token(lexer_T* lexer)

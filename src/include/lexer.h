@@ -16,6 +16,8 @@ typedef struct LEXER_STRUCT {
     unsigned int raw;
     unsigned int comp;
     unsigned int raws;
+    unsigned int x;
+    unsigned int y;
 } lexer_T;
 
 lexer_T* init_lexer(char* src);

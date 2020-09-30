@@ -84,22 +84,22 @@
         <section>
             <h3>I really want this list to be rendered using Python!</h3>
             <ul>
-(@#!/usr/bin/python
-for name in ["john", "sarah", "anna"]:
-    x = """(@
-        <li>
-            {}     
-        </li>
-    @)""".format(name)
-    print(x)
- @)
+            (@#!/usr/bin/python
+            for name in ["john", "sarah", "anna"]:
+                x = """(@
+                    <li>
+                        {}     
+                    </li>
+                @)""".format(name)
+                print(x)
+            @)
             </ul>
             <h3>I do want this list to be rendered in Node.js though</h3>
             <ul>
-(@#!/usr/bin/node
-console.log(["john", "sarah", "anna"]
-    .map(name => "(@<li>" + name + "</li>@)" ).join('\n'));
-@)
+            (@#!node
+            console.log(["john", "sarah", "anna"]
+              .map(name => (@ "<li>" + name + "</li>" @)).join('\n'));
+            @)
             </ul>
         </section>
     </body>
@@ -323,6 +323,9 @@ How do I send data into the template context?
 ```
 > Put a `context.json` file in the root of your project,
 > you can later access all data in this file inside your templates. 
+
+## Status
+![Compile and test](https://github.com/sebbekarlsson/gpp/workflows/Compile%20and%20test/badge.svg)
 
 ---
 **<div style="width: 100%; text-align: center;" align="center">:coffee: Not Made with Coffee and Love in San Francisco :coffee:</div>**

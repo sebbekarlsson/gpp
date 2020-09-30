@@ -1,5 +1,5 @@
 #include "include/visitor.h"
-#include "include/main.h"
+#include "include/gpp.h"
 #include "include/io.h"
 #include "include/utils.h"
 #include "include/AST_utils.h"
@@ -123,6 +123,7 @@ AST_T* visitor_visit(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node, int argc, AST_T** argv)
 {
     AST_T* new_root = init_ast(AST_ROOT);
+    new_root->x = node->x;
     AST_T* extend_root = 0;
     unsigned int skip = node->skip;
 
@@ -211,22 +212,26 @@ AST_T* visitor_visit_root(visitor_T* visitor, AST_T* node, int argc, AST_T** arg
             else
             {
                 if (node->raw_value && comment)
-                {
-                    gpp_result_T* gpp_res = gpp_eval(node->raw_value, 0, 0, 0);
+                {   
+                    if (comment_value[0] == '!') {
+                      char* indented = remove_indent(node->raw_value, node->x);
+                      gpp_result_T* gpp_res = gpp_eval(indented, 0, 0, 0);
+                      free(indented);
 
-                    char* value = sh(comment->comment_value, gpp_res->res);
-                    // visitor_buffer(visitor, value);
+                      char* value = sh(comment->comment_value+1, gpp_res->res);
+                      // visitor_buffer(visitor, value);
 
-                    AST_T* ast_string = init_ast(AST_STRING);
-                    ast_string->string_value = calloc(strlen(value) + 1, sizeof(char));
-                    strcpy(ast_string->string_value, value);
+                      AST_T* ast_string = init_ast(AST_STRING);
+                      ast_string->string_value = calloc(strlen(value) + 1, sizeof(char));
+                      strcpy(ast_string->string_value, value);
 
-                    free(value);
-                    free(gpp_res->res);
-                    free(gpp_res->node);
-                    free(gpp_res);
+                      free(value);
+                      free(gpp_res->res);
+                      free(gpp_res->node);
+                      free(gpp_res);
 
-                    return ast_string;
+                      return ast_string;
+                    }
                 }
             } 
         }
