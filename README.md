@@ -324,6 +324,7 @@ How do I send data into the template context?
 > Put a `context.json` file in the root of your project,
 > you can later access all data in this file inside your templates. 
 
+## Status
 ![Compile and test](https://github.com/sebbekarlsson/gpp/workflows/Compile%20and%20test/badge.svg)
 
 ---
