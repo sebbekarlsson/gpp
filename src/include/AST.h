@@ -1,6 +1,10 @@
 #ifndef GPP_AST_H
 #define GPP_AST_H
 #include <stdlib.h>
+
+// forward declaration
+struct VISITOR_STRUCT;
+
 typedef struct AST_STRUCT {
     enum
     {
@@ -60,6 +64,15 @@ typedef struct AST_STRUCT {
     unsigned int skip;
     unsigned int skip_comments;
     char* result;
+
+    struct AST_STRUCT* (*fptr)(
+      struct VISITOR_STRUCT* visitor,
+      struct AST_STRUCT* node,
+      int argc,
+      struct AST_STRUCT** argv,
+      int caller_argc,
+      struct AST_STRUCT** caller_argv
+    );
 
     unsigned int x;
     unsigned int y;
