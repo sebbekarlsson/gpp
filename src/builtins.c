@@ -1,5 +1,6 @@
 #include "include/builtins.h"
 #include "include/AST_utils.h"
+#include "include/utils.h"
 #include "include/io.h"
 #include <string.h>
 
@@ -27,9 +28,10 @@ void builtins_register(visitor_T* visitor)
 
 AST_T* builtin_fptr_map(visitor_T* visitor, AST_T* node, int argc, AST_T** argv, int caller_argc, AST_T** caller_argv)
 { 
-
   if (argc < 2)
-    return node;
+    return node; 
+
+  //unsigned int new_args_size = copy_args_into_args(argv, argc, &caller_argv, caller_argc);
 
   int iterable_type = ((AST_T*)argv[0])->type;
   AST_T* iterable = (iterable_type == AST_VAR || iterable_type == AST_CALL) ? visitor_visit(visitor, argv[0], caller_argc, caller_argv) : ((AST_T*)argv[0]);
@@ -40,11 +42,27 @@ AST_T* builtin_fptr_map(visitor_T* visitor, AST_T* node, int argc, AST_T** argv,
   for (int i = 0; i < (int)iterable->group_items_size; i++)
   {
     AST_T* item = visitor_visit(visitor, iterable->group_items[i], caller_argc, caller_argv);
+    
+    
+    /**
+     * TODO: move this to somewhere else and cleanup memory
+     * afterwards.
+     */
+    AST_T** child_args = calloc(1, sizeof(struct AST_STRUCT*));
+    child_args[0] = item;
+    unsigned int child_args_size = 1;
+    for (int j = 0; j < (int) caller_argc; j++)
+    {
+      child_args_size += 1;
+      child_args = realloc(child_args, (child_args_size) * sizeof(struct AST_STRUCT*));
+      child_args[child_args_size-1] = caller_argv[j];
+    }
 
-    AST_T* dot = visitor_visit(visitor, mapping, 1, (AST_T*[]){ item });
+    AST_T* dot = visitor_visit(visitor, mapping, child_args_size, child_args);
 
     ast_group_push_item(ast_group, dot);
   }
+
 
   return ast_group;
 }
