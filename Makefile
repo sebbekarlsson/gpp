@@ -4,6 +4,7 @@ objects = $(sources:.c=.o)
 sources_no_main = $(filter-out src/main.c, $(sources))
 objects_no_main = $(sources_no_main:.c=.o)
 flags = -g -Wall -lm -ldl -fPIC -rdynamic -L./extlib/. -ljson -I./extlib/libjson/src/include
+LPATH=$$HOME/.local
 
 $(info ${objects_no_main})
 
@@ -21,10 +22,10 @@ libgpp.a: $(objects_no_main)
 install:
 	make
 	make libgpp.a
-	mkdir -p /usr/local/include/gpp
-	cp -r ./src/include/* /usr/local/include/gpp/.
-	cp ./libgpp.a /usr/local/lib/.
-	cp ./a.out /usr/local/bin/gpp
+	mkdir -p $(LPATH)/include/gpp
+	cp -r ./src/include/* $(LPATH)/include/gpp/.
+	cp ./libgpp.a $(LPATH)/lib/.
+	cp ./a.out $(LPATH)/bin/gpp
 
 clean:
 	-rm *.out

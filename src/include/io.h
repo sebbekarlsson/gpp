@@ -3,7 +3,5 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-char* gpp_read_file(const char* filename);
+char *gpp_read_file(const char *filename);
 #endif
-

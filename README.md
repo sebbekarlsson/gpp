@@ -21,6 +21,10 @@
             Javascript, it takes in an iterable as the first argument and a
             yield / function as the second argument. 
 
+    join = ** Built-in function **
+          - Join a list with some value.
+            First argument is an iterable, second argument is anything you want. 
+
     cat = ** Built-in function **
           - This function simply reads an infinite list of files, concatenates
             the contents and dumps it out as it is.
