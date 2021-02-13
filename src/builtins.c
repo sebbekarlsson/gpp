@@ -1,5 +1,6 @@
 #include "include/builtins.h"
 #include "include/AST_utils.h"
+#include "include/gpp.h"
 #include "include/io.h"
 #include "include/utils.h"
 #include <string.h>
@@ -20,6 +21,7 @@ void builtins_register(visitor_T *visitor) {
   builtins_register_fptr(visitor, "map", builtin_fptr_map);
   builtins_register_fptr(visitor, "cat", builtin_fptr_cat);
   builtins_register_fptr(visitor, "join", builtin_fptr_join);
+  builtins_register_fptr(visitor, "load", builtin_fptr_load);
 }
 
 AST_T *builtin_fptr_map(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
@@ -87,6 +89,28 @@ AST_T *builtin_fptr_cat(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
   }
 
   return ast_group;
+}
+
+AST_T *builtin_fptr_load(visitor_T *visitor, AST_T *node, int argc,
+                         AST_T **argv, int caller_argc, AST_T **caller_argv) {
+  if (argc < 1)
+    return node;
+
+  AST_T *context = 0;
+
+  for (int i = 0; i < argc; i++) {
+    AST_T *string = (AST_T *)argv[i];
+
+    if (!string->string_value)
+      continue;
+
+    context = gpp_load_context(string->string_value);
+
+    if (context)
+      break;
+  }
+
+  return context ? context : init_ast(AST_NOOP);
 }
 
 AST_T *builtin_fptr_join(visitor_T *visitor, AST_T *node, int argc,

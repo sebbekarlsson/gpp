@@ -245,9 +245,17 @@ AST_T *visitor_visit_comp(visitor_T *visitor, AST_T *node, int argc,
 
 AST_T *visitor_visit_assign(visitor_T *visitor, AST_T *node, int argc,
                             AST_T **argv) {
-  printf("[Visitor.visit_assign]: No assignments except for function "
+
+  if (node->var_value) {
+    node->var_value = visitor_visit(visitor, node->var_value, argc, argv);
+    if (!ast_object_has_var(visitor->object, node->var_name))
+      ast_object_push_var(visitor->object, node);
+  }
+  /*printf("[Visitor.visit_assign]: No assignments except for function "
          "assignments are implemented at the moment.\n");
-  exit(1);
+  exit(1);*/
+
+  return node;
 }
 
 AST_T *visitor_visit_string(visitor_T *visitor, AST_T *node, int argc,

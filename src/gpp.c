@@ -8,10 +8,9 @@
 #include <string.h>
 #include <unistd.h>
 
-AST_T *gpp_load_context() {
-  return (!(access(CONTEXT_FILE, F_OK) != -1))
-             ? init_ast(AST_NOOP)
-             : json_load(gpp_read_file(CONTEXT_FILE));
+AST_T *gpp_load_context(char *filepath) {
+  return (!(access(filepath, F_OK) != -1)) ? init_ast(AST_NOOP)
+                                           : json_load(gpp_read_file(filepath));
 }
 
 gpp_result_T *init_gpp_result(char *res, AST_T *node) {
@@ -31,7 +30,7 @@ gpp_result_T *gpp_eval(char *source, unsigned int lazy, AST_T *parent,
   char *res = 0;
 
   if (!lazy) {
-    AST_T *context_object = context ? context : gpp_load_context();
+    AST_T *context_object = context ? context : gpp_load_context(CONTEXT_FILE);
     visitor_T *visitor = init_visitor(context_object);
     AST_T *resroot = visitor_visit(visitor, root, 0, 0);
 

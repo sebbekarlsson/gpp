@@ -158,6 +158,14 @@ static char *ast_float_to_string(AST_T *ast) {
   return val;
 }
 
+char *ast_assign_to_string(AST_T *ast) {
+  char *buff = calloc(2, sizeof(char));
+  buff[0] = '\0';
+  buff[1] = '\0';
+
+  return buff;
+}
+
 char *ast_to_string(AST_T *ast) {
   if (!ast) {
     char *str = calloc(5, sizeof(char));
@@ -168,6 +176,9 @@ char *ast_to_string(AST_T *ast) {
   switch (ast->type) {
   case AST_STRING:
     return ast_string_to_string(ast);
+    break;
+  case AST_ASSIGN:
+    return ast_assign_to_string(ast);
     break;
   case AST_INT:
     return ast_int_to_string(ast);
