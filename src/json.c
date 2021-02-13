@@ -1,5 +1,6 @@
 #include "include/json.h"
 #include <stdio.h>
+#include <string.h>
 
 AST_T *json_load(char *source) {
   json_parser_T *parser = init_json_parser(init_json_lexer(source));
@@ -33,6 +34,9 @@ AST_T *json_visit(json_ast_T *jnode) {
     break;
   case JSON_AST_LIST:
     return json_visit_list(jnode);
+    break;
+  case JSON_AST_ID:
+    return json_visit_id(jnode);
     break;
   default: {
     printf("[json_visit]: Unhandled node.\n");
@@ -87,6 +91,16 @@ AST_T *json_visit_integer(json_ast_T *jnode) {
 AST_T *json_visit_float(json_ast_T *jnode) {
   AST_T *ast = init_ast(AST_FLOAT);
   ast->float_value = jnode->float_value;
+  return ast;
+}
+
+AST_T *json_visit_id(json_ast_T *jnode) {
+  AST_T *ast = init_ast(AST_NAME);
+
+  if (jnode->string_value) {
+    ast->name = calloc(strlen(jnode->string_value) + 1, sizeof(char));
+    strcpy(ast->name, jnode->string_value);
+  }
   return ast;
 }
 

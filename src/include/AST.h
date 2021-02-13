@@ -22,6 +22,7 @@ typedef struct AST_STRUCT {
     AST_CALL,
     AST_OBJECT,
     AST_DOT,
+    AST_NAME
   } type;
 
   char *ignore_value;
@@ -36,6 +37,7 @@ typedef struct AST_STRUCT {
   float float_value;
   int int_value;
   char *var_name;
+  char *name;
 
   struct AST_STRUCT *call_group;
 

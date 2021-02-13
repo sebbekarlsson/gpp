@@ -9,3 +9,4 @@ AST_T *json_visit_string(json_ast_T *jnode);
 AST_T *json_visit_integer(json_ast_T *jnode);
 AST_T *json_visit_float(json_ast_T *jnode);
 AST_T *json_visit_list(json_ast_T *jnode);
+AST_T *json_visit_id(json_ast_T *jnode);
