@@ -22,6 +22,7 @@ void builtins_register(visitor_T *visitor) {
   builtins_register_fptr(visitor, "cat", builtin_fptr_cat);
   builtins_register_fptr(visitor, "join", builtin_fptr_join);
   builtins_register_fptr(visitor, "load", builtin_fptr_load);
+  builtins_register_fptr(visitor, "newline", builtin_fptr_newline);
 }
 
 AST_T *builtin_fptr_map(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
@@ -111,6 +112,12 @@ AST_T *builtin_fptr_load(visitor_T *visitor, AST_T *node, int argc,
   }
 
   return context ? context : init_ast(AST_NOOP);
+}
+
+AST_T *builtin_fptr_newline(visitor_T *visitor, AST_T *node, int argc,
+                            AST_T **argv, int caller_argc,
+                            AST_T **caller_argv) {
+  return init_ast(AST_NEWLINE);
 }
 
 AST_T *builtin_fptr_join(visitor_T *visitor, AST_T *node, int argc,

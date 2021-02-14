@@ -22,6 +22,7 @@ typedef struct AST_STRUCT {
     AST_CALL,
     AST_OBJECT,
     AST_DOT,
+    AST_NEWLINE,
     AST_NAME
   } type;
 

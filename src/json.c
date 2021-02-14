@@ -77,7 +77,9 @@ AST_T *json_visit_key_value(json_ast_T *jnode) {
 
 AST_T *json_visit_string(json_ast_T *jnode) {
   AST_T *ast = init_ast(AST_STRING);
-  ast->string_value = jnode->string_value;
+  char *strval = calloc(strlen(jnode->string_value) + 1, sizeof(char));
+  strcpy(strval, jnode->string_value);
+  ast->string_value = strval;
 
   return ast;
 }

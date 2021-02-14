@@ -47,6 +47,13 @@ AST_T *init_ast(int type) {
   return ast;
 }
 
+static char *ast_newline_to_string(AST_T *ast) {
+  char *nl = calloc(2, sizeof(char));
+  nl[0] = '\n';
+  nl[1] = '\0';
+  return nl;
+}
+
 static char *ast_string_to_string(AST_T *ast) {
   char *value = (char *)calloc(strlen(ast->string_value) + 1, sizeof(char));
   strcpy(value, ast->string_value);
@@ -101,6 +108,7 @@ static char *ast_group_to_string(AST_T *ast) {
   for (int i = 0; i < (int)ast->group_items_size; i++) {
     char *res = ast_to_string(ast->group_items[i]);
     val = (char *)realloc(val, (strlen(val) + strlen(res) + 1) * sizeof(char));
+
     strcat(val, res);
   }
 
@@ -206,6 +214,9 @@ char *ast_to_string(AST_T *ast) {
     break;
   case AST_FUNCTION:
     return ast_function_to_string(ast);
+    break;
+  case AST_NEWLINE:
+    return ast_newline_to_string(ast);
     break;
   default:
     return ast_default_to_string(ast);

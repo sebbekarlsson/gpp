@@ -250,6 +250,11 @@ AST_T *parser_parse_group(parser_T *parser, AST_T *parent) {
 
   AST_T *ast = init_ast(AST_GROUP);
 
+  if (parser->token->type == TOKEN_RPAREN) {
+    parser_eat(parser, TOKEN_RPAREN);
+    return ast;
+  }
+
   AST_T *item = parser_parse_expr(parser, parent);
 
   ast->group_items_size += 1;
