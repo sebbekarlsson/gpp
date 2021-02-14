@@ -81,7 +81,8 @@ token_T *lexer_parse_id(lexer_T *lexer) {
     value = (char *)realloc(value, (strlen(value) + 2) * sizeof(char));
     strcat(value, charstr(lexer->c));
     lexer_advance(lexer);
-  } while (lexer->c != '\0' && (isalpha(lexer->c) || isdigit(lexer->c)));
+  } while (lexer->c != '\0' &&
+           (isalpha(lexer->c) || isdigit(lexer->c) || lexer->c == '_'));
 
   return init_token(value, TOKEN_ID);
 }
