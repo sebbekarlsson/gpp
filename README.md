@@ -37,6 +37,11 @@
 
     floor = ** Built-in function **
           - Floors a number. For example, the input 60.6 would return 60.
+		  
+	load = ** Built-in function **
+          - Loads a JSON file.
+			The signature is:
+			load (string filename)
 
     key = ** Built-in function **
           - Extract a key by index from an object.
@@ -220,6 +225,14 @@
         {{ map (favouriteFruits, (@<li>{{ $0 }}</li>@)) }}
     </body>
 </html>
+```
+> You can also use the `load` function. Like this:
+```html
+{{
+	mydata = load("somedata.json")
+}}
+
+<h1>{{ mydata.firstname }}</h1>
 ```
 
 ## Any interpreter you want
