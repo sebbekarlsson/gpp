@@ -1,4 +1,4 @@
-#include "include/escape.h"
+#include <gpp/escape.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -1,14 +1,16 @@
 #ifndef PARSER_H
 #define PARSER_H
-#include "AST.h"
-#include "lexer.h"
+#include <gpp/AST.h>
+#include <gpp/lexer.h>
+#include <gpp/env.h>
 typedef struct PARSER_STRUCT {
   token_T *token;
   token_T *prev_token;
   lexer_T *lexer;
+  GPPEnv* env;
 } parser_T;
 
-parser_T *init_parser(lexer_T *lexer);
+parser_T *init_parser(lexer_T *lexer, GPPEnv* env);
 
 token_T *parser_eat(parser_T *parser, int type);
 

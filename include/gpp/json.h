@@ -1,5 +1,5 @@
 #include "AST.h"
-#include <json_parser.h>
+#include <json/json_parser.h>
 
 AST_T *json_load(char *source);
 AST_T *json_visit(json_ast_T *jnode);

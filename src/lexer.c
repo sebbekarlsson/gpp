@@ -1,4 +1,4 @@
-#include "include/lexer.h"
+#include <gpp/lexer.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>

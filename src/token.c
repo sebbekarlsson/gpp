@@ -1,4 +1,4 @@
-#include "include/token.h"
+#include <gpp/token.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -1,14 +1,15 @@
-#include "include/parser.h"
-#include "include/gpp.h"
+#include <gpp/parser.h>
+#include <gpp/gpp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-parser_T *init_parser(lexer_T *lexer) {
+parser_T *init_parser(lexer_T *lexer, GPPEnv* env) {
   parser_T *parser = (parser_T *)calloc(1, sizeof(struct PARSER_STRUCT));
   parser->lexer = lexer;
   parser->token = lexer_next_token(parser->lexer);
   parser->prev_token = parser->token;
+  parser->env = env;
 
   return parser;
 }
@@ -113,7 +114,7 @@ AST_T *parser_parse_raw(parser_T *parser, AST_T *parent) {
   ast->parent = parent;
   ast->raw_value = (char *)calloc(strlen(value) + 1, sizeof(char));
   strcpy(ast->raw_value, value);
-  gpp_result_T *evres = gpp_eval(ast->raw_value, 1, ast, 0);
+  gpp_result_T *evres = gpp_eval(ast->raw_value, 1, ast, 0, parser->env);
   evres->node->x = x;
   ast->raw_child = evres->node;
   ast->result = evres->res;

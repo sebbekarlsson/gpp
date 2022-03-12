@@ -1,0 +1,5 @@
+-I/usr/local/include
+-I/usr/include
+-I./include
+-I./build/_deps/json_static-src/include
+-I./build/_deps/hashmap_static-src/include

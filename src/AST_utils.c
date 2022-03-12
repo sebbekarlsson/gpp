@@ -1,5 +1,5 @@
-#include "include/AST_utils.h"
-#include "include/utils.h"
+#include <gpp/AST_utils.h>
+#include <gpp/utils.h>
 #include <stdio.h>
 #include <string.h>
 

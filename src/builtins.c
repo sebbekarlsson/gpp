@@ -1,8 +1,8 @@
-#include "include/builtins.h"
-#include "include/AST_utils.h"
-#include "include/gpp.h"
-#include "include/io.h"
-#include "include/utils.h"
+#include <gpp/builtins.h>
+#include <gpp/AST_utils.h>
+#include <gpp/gpp.h>
+#include <gpp/io.h>
+#include <gpp/utils.h>
 #include <string.h>
 
 static void builtins_register_fptr(visitor_T *visitor, const char *name,

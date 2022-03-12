@@ -1,11 +1,12 @@
-#include "include/visitor.h"
-#include "include/AST_utils.h"
-#include "include/builtins.h"
-#include "include/escape.h"
-#include "include/gpp.h"
-#include "include/io.h"
-#include "include/lexer.h"
-#include "include/utils.h"
+#include <gpp/visitor.h>
+#include <gpp/AST_utils.h>
+#include <gpp/builtins.h>
+#include <gpp/escape.h>
+#include <gpp/gpp.h>
+#include <gpp/io.h>
+#include <gpp/lexer.h>
+#include <gpp/utils.h>
+
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,11 +53,12 @@ static char *sh(char *binpath, char *source) {
   return output;
 }
 
-visitor_T *init_visitor(AST_T *object) {
+visitor_T *init_visitor(AST_T *object, GPPEnv* env) {
   visitor_T *visitor = (visitor_T *)calloc(1, sizeof(struct VISITOR_STRUCT));
   visitor->object = object;
   visitor->follow_pointers = 1;
   builtins_register(visitor);
+  visitor->env = env;
 
   return visitor;
 }
@@ -169,7 +171,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
               return visitor_visit(visitor, var_value, argc, argv);
             }
 
-            gpp_result_T *gpp_res = gpp_eval(node->raw_value, 1, 0, 0);
+            gpp_result_T *gpp_res = gpp_eval(node->raw_value, 1, 0, 0, visitor->env);
 
             AST_T *var = init_ast(AST_VAR);
             var->var_name = calloc(strlen(val) + 1, sizeof(char));
@@ -179,7 +181,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
             free(gpp_res);
             skip = 1;
           } else if (strcmp(op, "extends") == 0) {
-            gpp_result_T *gpp_res = gpp_eval(gpp_read_file(val), 1, 0, 0);
+            gpp_result_T *gpp_res = gpp_eval(gpp_read_file(val), 1, 0, 0, visitor->env);
             extend_root = gpp_res->node;
             free(gpp_res);
           }
@@ -191,7 +193,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
         if (node->raw_value && comment) {
           if (comment_value[0] == '!') {
             char *indented = remove_indent(node->raw_value, node->x);
-            gpp_result_T *gpp_res = gpp_eval(indented, 0, 0, 0);
+            gpp_result_T *gpp_res = gpp_eval(indented, 0, 0, 0, visitor->env);
             free(indented);
 
             char *value = sh(comment->comment_value + 1, gpp_res->res);
@@ -402,8 +404,11 @@ AST_T *visitor_visit_call(visitor_T *visitor, AST_T *node, int argc,
       if (!string->string_value)
         continue;
 
-      char *contents = gpp_read_file(string->string_value);
-      gpp_result_T *res = gpp_eval(contents, 0, 0, visitor->object);
+
+      char* path = gpp_path_join(visitor->env->base_dir, string->string_value);
+
+      char *contents = gpp_read_file(path);
+      gpp_result_T *res = gpp_eval(contents, 0, 0, visitor->object, visitor->env);
 
       AST_T *ast_string = init_ast(AST_STRING);
       ast_string->string_value = calloc(strlen(res->res) + 1, sizeof(char));
@@ -413,6 +418,7 @@ AST_T *visitor_visit_call(visitor_T *visitor, AST_T *node, int argc,
       free(contents);
       free(res->res);
       free(res);
+      free(path);
     }
 
     return ast_group;
