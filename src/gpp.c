@@ -26,10 +26,11 @@ gpp_result_T *init_gpp_result(char *res, AST_T *node) {
 gpp_result_T *gpp_eval(char *source, unsigned int lazy, AST_T *parent,
                        AST_T *context, GPPEnv* env) {
 
-
   if (!env->base_dir) {
     env->base_dir = gpp_dirname(env->base_path);
   }
+
+
 
   lexer_T *lexer = init_lexer(source);
   parser_T *parser = init_parser(lexer, env);

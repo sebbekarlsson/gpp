@@ -74,6 +74,16 @@ static char *ast_comment_to_string(AST_T *ast) {
 
   return value;*/
 
+  if (!ast_comment_is_meaningful(ast) && ast->comment_value != 0) {
+    uint32_t len = strlen(ast->comment_value);
+    char* val = (char*)calloc(len + 2, sizeof(char));
+    strcat(val, ast->comment_value);
+    val[len] = '\n';
+    return val;
+  }
+
+
+
   char *str = (char *)calloc(1, sizeof(char));
   str[0] = '\0';
 
@@ -222,4 +232,16 @@ char *ast_to_string(AST_T *ast) {
     return ast_default_to_string(ast);
     break;
   }
+}
+
+
+unsigned int ast_comment_is_meaningful(AST_T* comment) {
+  if (!comment) return 0;
+  char *comment_value = comment->comment_value;
+  if (!comment_value) return 0;
+
+  if (strlen(comment_value) == 1) return 0;
+
+  if (comment_value[1] != '%' && comment_value[1] != '!') return 0;
+  return 1;
 }

@@ -2,6 +2,6 @@
 #include "include/test_inputs.h"
 
 int main(int argc, char *argv[]) {
-  test_inputs();
+  test_inputs(argv);
   return 0;
 }

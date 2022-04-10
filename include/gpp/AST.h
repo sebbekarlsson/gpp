@@ -79,4 +79,6 @@ typedef struct AST_STRUCT {
 AST_T *init_ast(int type);
 
 char *ast_to_string(AST_T *ast);
+
+unsigned int ast_comment_is_meaningful(AST_T* ast);
 #endif

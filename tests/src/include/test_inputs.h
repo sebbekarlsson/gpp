@@ -1,1 +1,1 @@
-void test_inputs();
+void test_inputs(char* argv[]);

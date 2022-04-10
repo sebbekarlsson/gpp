@@ -112,6 +112,8 @@ AST_T *visitor_visit(visitor_T *visitor, AST_T *node, int argc, AST_T **argv) {
   assert_not_reached();
 }
 
+
+
 AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
                           AST_T **argv) {
   AST_T *new_root = init_ast(AST_ROOT);
@@ -126,9 +128,11 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
       if (comment->type != AST_COMMENT)
         continue;
 
+      if (!ast_comment_is_meaningful(comment)) continue;
+
       char *comment_value = comment->comment_value;
 
-      if (comment_value[0] == '%') {
+      if (comment_value[1] == '%') {
         /**
          * Below we are doing some parsing of whatever is after
          * the "%" character.
@@ -138,6 +142,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
          */
 
         lexer_T *lexer = init_lexer(comment_value);
+        lexer_advance(lexer);
         token_T *tok = 0;
 
         char *op = 0;
@@ -191,12 +196,12 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
         }
       } else {
         if (node->raw_value && comment) {
-          if (comment_value[0] == '!') {
+          if (comment_value[1] == '!') {
             char *indented = remove_indent(node->raw_value, node->x);
             gpp_result_T *gpp_res = gpp_eval(indented, 0, 0, 0, visitor->env);
             free(indented);
 
-            char *value = sh(comment->comment_value + 1, gpp_res->res);
+            char *value = sh(comment->comment_value + 2, gpp_res->res);
 
             AST_T *ast_string = init_ast(AST_STRING);
             ast_string->string_value = calloc(strlen(value) + 1, sizeof(char));
@@ -218,7 +223,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
     for (int i = 0; i < (int)node->root_items_size; i++) {
       AST_T *child = node->root_items[i];
 
-      if (child->type == AST_COMMENT)
+      if (child->type == AST_COMMENT  && ast_comment_is_meaningful(child))
         continue;
 
       ast_root_push_item(new_root, visitor_visit(visitor, child, argc, argv));

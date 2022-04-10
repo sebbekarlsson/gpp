@@ -128,7 +128,7 @@ token_T *lexer_parse_number(lexer_T *lexer) {
 }
 
 token_T *lexer_parse_comment(lexer_T *lexer) {
-  lexer_advance(lexer);
+ // lexer_advance(lexer);
 
   char *value = (char *)calloc(1, sizeof(char));
   value[0] = '\0';
