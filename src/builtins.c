@@ -45,9 +45,6 @@ AST_T *builtin_fptr_range(visitor_T *visitor, AST_T *node, int argc, AST_T **arg
   if (n <= 0) return node;
 
 
-  printf("%d\n", n);
-
-
   AST_T *ast_group = init_ast(AST_GROUP);
 
 
