@@ -57,6 +57,11 @@
           - Extract a value by index or key from an object or list.
             The signature is:
             value ((object || list) (index || key))
+            
+    range = ** Built-in function **
+          - Generate a list from 0 to -> N
+            {{ map (range(100), (@<li>{{ $0 }}</li>@)) }}
+
 
     $ = ** Positional parameter constant **
           - This is heavily inspired by the shell, it allows you to access

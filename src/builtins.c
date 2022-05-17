@@ -23,6 +23,43 @@ void builtins_register(visitor_T *visitor) {
   builtins_register_fptr(visitor, "join", builtin_fptr_join);
   builtins_register_fptr(visitor, "load", builtin_fptr_load);
   builtins_register_fptr(visitor, "newline", builtin_fptr_newline);
+  builtins_register_fptr(visitor, "range", builtin_fptr_range);
+}
+
+AST_T *builtin_fptr_range(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
+                          int caller_argc, AST_T **caller_argv) {
+
+  if (argc < 1)
+    return node;
+
+  // unsigned int new_args_size = copy_args_into_args(argv, argc, &caller_argv,
+  // caller_argc);
+
+  int n = 0;
+
+  AST_T *n_val = (AST_T *)argv[0];
+  if (!n_val) return node;
+  n_val = visitor_visit(visitor, n_val, argc, argv);
+  if ((n_val->type != AST_INT && n_val->type != AST_FLOAT)) return node;
+  n = (int)MAX(n_val->int_value, n_val->float_value);
+  if (n <= 0) return node;
+
+
+  printf("%d\n", n);
+
+
+  AST_T *ast_group = init_ast(AST_GROUP);
+
+
+  for (int i = 0; i < n; i++) {
+    AST_T* numeric = init_ast(AST_INT);
+    numeric->int_value = i;
+
+    ast_group_push_item(ast_group, numeric);
+  }
+
+
+  return ast_group;
 }
 
 AST_T *builtin_fptr_map(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,

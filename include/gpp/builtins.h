@@ -15,4 +15,7 @@ AST_T *builtin_fptr_load(visitor_T *visitor, AST_T *node, int argc,
 
 AST_T *builtin_fptr_newline(visitor_T *visitor, AST_T *node, int argc,
                             AST_T **argv, int caller_argc, AST_T **caller_argv);
+
+AST_T *builtin_fptr_range(visitor_T *visitor, AST_T *node, int argc,
+                            AST_T **argv, int caller_argc, AST_T **caller_argv);
 #endif
