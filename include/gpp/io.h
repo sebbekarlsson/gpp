@@ -4,4 +4,5 @@
 #include <stdlib.h>
 
 char *gpp_read_file(const char *filename);
+unsigned int gpp_file_exists(const char *path);
 #endif

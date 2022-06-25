@@ -6,11 +6,17 @@
 #include <gpp/io.h>
 #include <gpp/lexer.h>
 #include <gpp/utils.h>
+#include <limits.h>
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+unsigned int gpp_visitor_has_included(visitor_T* visitor, const char* path) {
+  if (!visitor->global_env) return 0;
+  return gpp_has_included(visitor->global_env, path);
+}
 
 static char *charstr(char c) {
   char *new_str = (char *)calloc(2, sizeof(char));
@@ -53,12 +59,13 @@ static char *sh(char *binpath, char *source) {
   return output;
 }
 
-visitor_T *init_visitor(AST_T *object, GPPEnv* env) {
+visitor_T *init_visitor(AST_T *object, GPPEnv* env, GPPEnv* global_env) {
   visitor_T *visitor = (visitor_T *)calloc(1, sizeof(struct VISITOR_STRUCT));
   visitor->object = object;
   visitor->follow_pointers = 1;
   builtins_register(visitor);
   visitor->env = env;
+  visitor->global_env = global_env;
 
   return visitor;
 }
@@ -176,7 +183,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
               return visitor_visit(visitor, var_value, argc, argv);
             }
 
-            gpp_result_T *gpp_res = gpp_eval(node->raw_value, 1, 0, 0, visitor->env);
+            gpp_result_T *gpp_res = gpp_eval(node->raw_value, 1, 0, 0, visitor->env, visitor->global_env);
 
             AST_T *var = init_ast(AST_VAR);
             var->var_name = calloc(strlen(val) + 1, sizeof(char));
@@ -186,7 +193,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
             free(gpp_res);
             skip = 1;
           } else if (strcmp(op, "extends") == 0) {
-            gpp_result_T *gpp_res = gpp_eval(gpp_read_file(val), 1, 0, 0, visitor->env);
+            gpp_result_T *gpp_res = gpp_eval(gpp_read_file(val), 1, 0, 0, visitor->env, visitor->global_env);
             extend_root = gpp_res->node;
             free(gpp_res);
           }
@@ -198,7 +205,7 @@ AST_T *visitor_visit_root(visitor_T *visitor, AST_T *node, int argc,
         if (node->raw_value && comment) {
           if (comment_value[1] == '!') {
             char *indented = remove_indent(node->raw_value, node->x);
-            gpp_result_T *gpp_res = gpp_eval(indented, 0, 0, 0, visitor->env);
+            gpp_result_T *gpp_res = gpp_eval(indented, 0, 0, 0, visitor->env, visitor->global_env);
             free(indented);
 
             char *value = sh(comment->comment_value + 2, gpp_res->res);
@@ -410,10 +417,23 @@ AST_T *visitor_visit_call(visitor_T *visitor, AST_T *node, int argc,
         continue;
 
 
+
+
+
       char* path = gpp_path_join(visitor->env->base_dir, string->string_value);
+      if (gpp_visitor_has_included(visitor, path)) continue;
+
+      if (visitor->global_env && visitor->global_env->includes && visitor->env) {
+        map_set(visitor->global_env->includes, path, visitor->env);
+      }
+
+      if (!gpp_file_exists(path)) {
+          fprintf(stderr, "# GPP ERROR: no such file %s\n", path);
+          return ast_group;
+      }
 
       char *contents = gpp_read_file(path);
-      gpp_result_T *res = gpp_eval(contents, 0, 0, visitor->object, visitor->env);
+      gpp_result_T *res = gpp_eval(contents, 0, 0, visitor->object, visitor->env, visitor->global_env);
 
       AST_T *ast_string = init_ast(AST_STRING);
       ast_string->string_value = calloc(strlen(res->res) + 1, sizeof(char));

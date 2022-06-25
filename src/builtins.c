@@ -4,6 +4,7 @@
 #include <gpp/io.h>
 #include <gpp/utils.h>
 #include <string.h>
+#include <limits.h>
 
 static void builtins_register_fptr(visitor_T *visitor, const char *name,
                                    AST_T *(*fptr)(visitor_T *visitor,
@@ -114,6 +115,12 @@ AST_T *builtin_fptr_cat(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
 
     if (!string->string_value)
       continue;
+
+
+    if (!gpp_file_exists(string->string_value)) {
+      fprintf(stderr, "# GPP ERROR: no such file %s\n", string->string_value);
+      return ast_group;
+    }
 
     char *contents = gpp_read_file(string->string_value);
     AST_T *ast_string = init_ast(AST_STRING);

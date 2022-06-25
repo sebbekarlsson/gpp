@@ -24,22 +24,28 @@ gpp_result_T *init_gpp_result(char *res, AST_T *node) {
 }
 
 gpp_result_T *gpp_eval(char *source, unsigned int lazy, AST_T *parent,
-                       AST_T *context, GPPEnv* env) {
+                       AST_T *context, GPPEnv* env, GPPEnv* global_env) {
 
   if (!env->base_dir) {
     env->base_dir = gpp_dirname(env->base_path);
   }
 
+  if (!global_env->includes) {
+    global_env->includes = NEW_MAP();
+  }
 
+  if (gpp_has_included(global_env, env->base_path)) {
+    return init_gpp_result(strdup(""), init_ast(AST_NOOP));
+  }
 
   lexer_T *lexer = init_lexer(source);
-  parser_T *parser = init_parser(lexer, env);
+  parser_T *parser = init_parser(lexer, env, global_env);
   AST_T *root = parser_parse(parser, parent);
   char *res = 0;
 
   if (!lazy) {
     AST_T *context_object = context ? context : gpp_load_context(CONTEXT_FILE);
-    visitor_T *visitor = init_visitor(context_object, env);
+    visitor_T *visitor = init_visitor(context_object, env, global_env);
     AST_T *resroot = visitor_visit(visitor, root, 0, 0);
 
     res = ast_to_string(resroot);
@@ -50,4 +56,10 @@ gpp_result_T *gpp_eval(char *source, unsigned int lazy, AST_T *parent,
   free(lexer);
 
   return init_gpp_result(res, root);
+}
+
+unsigned int gpp_has_included(GPPEnv* global_env, const char* path) {
+  if (global_env->includes == 0) return 0;
+
+  return map_get_value(global_env->includes, (char*)path) != 0;
 }

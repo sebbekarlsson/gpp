@@ -11,7 +11,8 @@ int main(int argc, char *argv[]) {
 
   const char* filepath = argv[1];
   GPPEnv env = (GPPEnv){ .base_path = filepath };
-  gpp_result_T *res = gpp_eval(gpp_read_file(filepath), 0, 0, 0, &env);
+  GPPEnv global_env = (GPPEnv){ .base_path = filepath };
+  gpp_result_T *res = gpp_eval(gpp_read_file(filepath), 0, 0, 0, &env, &global_env);
 
   if (env.base_dir) {
     free(env.base_dir);

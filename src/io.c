@@ -2,6 +2,8 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 /**
  * Reads the content of a file
@@ -36,4 +38,8 @@ char *gpp_read_file(const char *filename) {
     free(line);
 
   return buffer;
+}
+
+unsigned int gpp_file_exists(const char *path) {
+  return access(path, F_OK) == 0;
 }

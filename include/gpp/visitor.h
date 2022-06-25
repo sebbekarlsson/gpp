@@ -7,9 +7,10 @@ typedef struct VISITOR_STRUCT {
   AST_T *object;
   unsigned int follow_pointers;
   GPPEnv* env;
+  GPPEnv* global_env;
 } visitor_T;
 
-visitor_T *init_visitor(AST_T *object, GPPEnv* env);
+visitor_T *init_visitor(AST_T *object, GPPEnv* env, GPPEnv* global_env);
 
 AST_T *visitor_visit(visitor_T *visitor, AST_T *node, int argc, AST_T **argv);
 

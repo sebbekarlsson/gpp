@@ -8,9 +8,10 @@ typedef struct PARSER_STRUCT {
   token_T *prev_token;
   lexer_T *lexer;
   GPPEnv* env;
+  GPPEnv* global_env;
 } parser_T;
 
-parser_T *init_parser(lexer_T *lexer, GPPEnv* env);
+parser_T *init_parser(lexer_T *lexer, GPPEnv* env, GPPEnv* global_env);
 
 token_T *parser_eat(parser_T *parser, int type);
 
