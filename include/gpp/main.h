@@ -4,6 +4,7 @@
 
 #ifndef CONTEXT_FILE
 #define CONTEXT_FILE "context.json"
+#define CONTEXT_FILE2 "../context.json"
 #endif
 
 #endif

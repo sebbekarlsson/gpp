@@ -5,13 +5,17 @@
 #include <gpp/visitor.h>
 #include <gpp/gpp.h>
 #include <gpp/utils.h>
+#include <gpp/macros.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 
 AST_T *gpp_load_context(char *filepath) {
-  return (!(access(filepath, F_OK) != -1)) ? init_ast(AST_NOOP)
-                                           : json_load(gpp_read_file(filepath));
+  if (!(access(filepath, F_OK) != -1)) return 0;
+
+
+  return json_load(gpp_read_file(filepath));
+
 }
 
 gpp_result_T *init_gpp_result(char *res, AST_T *node) {
@@ -44,7 +48,15 @@ gpp_result_T *gpp_eval(char *source, unsigned int lazy, AST_T *parent,
   char *res = 0;
 
   if (!lazy) {
-    AST_T *context_object = context ? context : gpp_load_context(CONTEXT_FILE);
+
+    if (!context) {
+      context = OR(gpp_load_context(CONTEXT_FILE), gpp_load_context(CONTEXT_FILE2));
+
+      if (!context) context = init_ast(AST_NOOP);
+    }
+
+
+    AST_T *context_object = context;
     visitor_T *visitor = init_visitor(context_object, env, global_env);
     AST_T *resroot = visitor_visit(visitor, root, 0, 0);
 

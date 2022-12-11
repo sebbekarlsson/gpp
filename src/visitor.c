@@ -6,6 +6,7 @@
 #include <gpp/io.h>
 #include <gpp/lexer.h>
 #include <gpp/utils.h>
+#include <gpp/macros.h>
 #include <limits.h>
 
 #include <math.h>
@@ -421,6 +422,7 @@ AST_T *visitor_visit_call(visitor_T *visitor, AST_T *node, int argc,
 
 
       char* path = gpp_path_join(visitor->env->base_dir, string->string_value);
+      if (!path) GPP_WARNING_RETURN(ast_group, stderr, "path == null.\n");
       if (gpp_visitor_has_included(visitor, path)) continue;
 
       if (visitor->global_env && visitor->global_env->includes && visitor->env) {
@@ -433,7 +435,16 @@ AST_T *visitor_visit_call(visitor_T *visitor, AST_T *node, int argc,
       }
 
       char *contents = gpp_read_file(path);
+
+      if (!contents) {
+        GPP_WARNING_RETURN(ast_group, stderr, "contents == null.\n");
+      }
+
       gpp_result_T *res = gpp_eval(contents, 0, 0, visitor->object, visitor->env, visitor->global_env);
+
+      if (!res) {
+        GPP_WARNING_RETURN(ast_group, stderr, "res == null.\n");
+      }
 
       AST_T *ast_string = init_ast(AST_STRING);
       ast_string->string_value = calloc(strlen(res->res) + 1, sizeof(char));
@@ -569,8 +580,13 @@ AST_T *visitor_visit_call(visitor_T *visitor, AST_T *node, int argc,
        * We are doing this by generating a new list of variable definitions
        * and passing them to the scope of the function body.
        */
+
+
+      if (!var->function_args->group_items[i]->var_name) continue;
+      if (!args[i]) continue;
+
       AST_T *new_var = init_ast(AST_VAR);
-      new_var->var_value = args[i];
+      new_var->var_value = visitor_visit(visitor, args[i], argc, argv);
       new_var->var_name =
           calloc(strlen(var->function_args->group_items[i]->var_name) + 1,
                  sizeof(char));
