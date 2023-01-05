@@ -57,7 +57,7 @@ token_T *lexer_advance_token(lexer_T *lexer, token_T *token) {
 }
 
 void lexer_skip_whitespace(lexer_T *lexer) {
-  while ((lexer->c == ' ' || lexer->c == 10 || lexer->c == '\n') &&
+  while ((lexer->c == ' ' || lexer->c == '\t' || lexer->c == '\r' || lexer->c == 10 || lexer->c == '\n') &&
          (lexer->i < lexer->len))
     lexer_advance(lexer);
 }
