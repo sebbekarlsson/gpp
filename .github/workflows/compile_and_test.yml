@@ -16,4 +16,4 @@ jobs:
       #- name: install dependencies
       #run: sudo apt-get update -y && sudo apt-get install --yes libcmocka-dev libcmocka0
     - name: tests
-      run: git submodule update; git submodule sync; cd tests && make && ./a.out
+      run: git submodule update; git submodule sync; mkdir -p build && cd build && cmake .. && make && cd tests && ./gpp_test

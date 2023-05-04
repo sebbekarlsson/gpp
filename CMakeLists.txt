@@ -74,6 +74,4 @@ init_gpp_deps(gpp)
 init_gpp_deps(gpp_static)
 init_gpp_deps(gpp_e)
 
-if (UNIT_TEST)
-  add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
-endif()
+add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tests)
