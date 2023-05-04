@@ -11,9 +11,5 @@ jobs:
     - uses: actions/checkout@v1
       with:
         submodules: true
-    - name: make
-      run: make
-      #- name: install dependencies
-      #run: sudo apt-get update -y && sudo apt-get install --yes libcmocka-dev libcmocka0
     - name: tests
       run: git submodule update; git submodule sync; mkdir -p build && cd build && cmake .. && make && cd tests && ./gpp_test
