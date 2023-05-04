@@ -1,14 +1,43 @@
 {
     "names": ["Not", "Made", "with", "Coffee", "and", "Love", "in", "San", "Francisco"],
     "xyz": {
-        "someValue": { "otherValue": 1 }
+	"someValue": { "otherValue": 1 }
     },
     "abc": {
-        "name": "john"
+	"name": "john"
     },
     "score": {
-        "john": 128,
-        "sarah": 356,
-        "anna": 70
-    }
+	"john": 128,
+	"sarah": 356,
+	"anna": 70
+    },
+    "skills": [
+	{ "python": 95 },
+	{ "javascript": 79 },
+	{ "C": 89 },
+	{ "C++": 79 },
+	{ "PHP": 89 },
+	{ "Typescript": 79 },
+	{ "Bash": 79 },
+	{ "SQL": 60 },
+	{ "CSS": 81 },
+	{ "HTML": 90 },
+	{ "SCSS": 82 },
+	{ "SEO": 36 },
+	{ "Java": 60 },
+	{ "Swift": 11 },
+	{ "React.js": 76 },
+	{ "Vue.js": 50 },
+	{ "Flask": 90 },
+	{ "MongoDB": 69 },
+	{ "Flutter": 40 },
+	{ "React Native": 50 },
+	{ "OpenGL": 70 },
+	{ "Audio": 33 },
+	{ "Linux": 88 },
+	{ "Kubernetes": 20 },
+	{ "Elastic Search": 25 },
+	{ "Firebase": 59 },
+	{ "Wordpress": 86 }
+    ]
 }

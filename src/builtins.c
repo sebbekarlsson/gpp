@@ -1,10 +1,12 @@
-#include <gpp/builtins.h>
+#include "gpp/AST.h"
 #include <gpp/AST_utils.h>
+#include <gpp/builtins.h>
 #include <gpp/gpp.h>
 #include <gpp/io.h>
 #include <gpp/utils.h>
-#include <string.h>
 #include <limits.h>
+#include <string.h>
+#include <gpp/macros.h>
 
 static void builtins_register_fptr(visitor_T *visitor, const char *name,
                                    AST_T *(*fptr)(visitor_T *visitor,
@@ -20,6 +22,7 @@ static void builtins_register_fptr(visitor_T *visitor, const char *name,
 
 void builtins_register(visitor_T *visitor) {
   builtins_register_fptr(visitor, "map", builtin_fptr_map);
+  builtins_register_fptr(visitor, "sort", builtin_fptr_sort);
   builtins_register_fptr(visitor, "cat", builtin_fptr_cat);
   builtins_register_fptr(visitor, "join", builtin_fptr_join);
   builtins_register_fptr(visitor, "load", builtin_fptr_load);
@@ -27,8 +30,8 @@ void builtins_register(visitor_T *visitor) {
   builtins_register_fptr(visitor, "range", builtin_fptr_range);
 }
 
-AST_T *builtin_fptr_range(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
-                          int caller_argc, AST_T **caller_argv) {
+AST_T *builtin_fptr_range(visitor_T *visitor, AST_T *node, int argc,
+                          AST_T **argv, int caller_argc, AST_T **caller_argv) {
 
   if (argc < 1)
     return node;
@@ -39,23 +42,23 @@ AST_T *builtin_fptr_range(visitor_T *visitor, AST_T *node, int argc, AST_T **arg
   int n = 0;
 
   AST_T *n_val = (AST_T *)argv[0];
-  if (!n_val) return node;
+  if (!n_val)
+    return node;
   n_val = visitor_visit(visitor, n_val, argc, argv);
-  if ((n_val->type != AST_INT && n_val->type != AST_FLOAT)) return node;
+  if ((n_val->type != AST_INT && n_val->type != AST_FLOAT))
+    return node;
   n = (int)MAX(n_val->int_value, n_val->float_value);
-  if (n <= 0) return node;
-
+  if (n <= 0)
+    return node;
 
   AST_T *ast_group = init_ast(AST_GROUP);
 
-
   for (int i = 0; i < n; i++) {
-    AST_T* numeric = init_ast(AST_INT);
+    AST_T *numeric = init_ast(AST_INT);
     numeric->int_value = i;
 
     ast_group_push_item(ast_group, numeric);
   }
-
 
   return ast_group;
 }
@@ -103,6 +106,29 @@ AST_T *builtin_fptr_map(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
   return ast_group;
 }
 
+AST_T *builtin_fptr_sort(visitor_T *visitor, AST_T *node, int argc,
+                         AST_T **argv, int caller_argc, AST_T **caller_argv) {
+
+  int iterable_type = ((AST_T *)argv[0])->type;
+  AST_T *iterable =
+      (iterable_type == AST_VAR || iterable_type == AST_CALL)
+          ? visitor_visit(visitor, argv[0], caller_argc, caller_argv)
+          : ((AST_T *)argv[0]);
+
+  AST_T *ast_group = init_ast(AST_GROUP);
+
+  for (int i = 0; i < (int)iterable->group_items_size; i++) {
+    AST_T *item = visitor_visit(visitor, iterable->group_items[i], caller_argc,
+                                caller_argv);
+
+    ast_group_push_item(ast_group, item);
+  }
+
+  ast_sort_alphabetical(ast_group); 
+
+  return ast_group;
+}
+
 AST_T *builtin_fptr_cat(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
                         int caller_argc, AST_T **caller_argv) {
   if (argc < 1)
@@ -115,7 +141,6 @@ AST_T *builtin_fptr_cat(visitor_T *visitor, AST_T *node, int argc, AST_T **argv,
 
     if (!string->string_value)
       continue;
-
 
     if (!gpp_file_exists(string->string_value)) {
       fprintf(stderr, "# GPP ERROR: no such file %s\n", string->string_value);

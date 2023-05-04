@@ -21,6 +21,11 @@
             Javascript, it takes in an iterable as the first argument and a
             yield / function as the second argument. 
 
+    sort = ** Built-in function **
+          - Sorts an array in alphabetical order.
+			If the array contains a list of objects/dictionaries,
+			the items will be sorted using the first key in each object/dictionary.
+
     join = ** Built-in function **
           - Join a list with some value.
             First argument is an iterable, second argument is anything you want. 

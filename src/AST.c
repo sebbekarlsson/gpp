@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <gpp/AST.h>
 #include <gpp/utils.h>
 #include <stdio.h>
@@ -47,6 +48,13 @@ AST_T *init_ast(int type) {
   return ast;
 }
 
+bool ast_is_valid_object(AST_T *ast) {
+  if (!ast)
+    return false;
+  return ast->type == AST_OBJECT && ast->object_vars != 0 &&
+         ast->object_vars_size > 0;
+}
+
 static char *ast_newline_to_string(AST_T *ast) {
   char *nl = calloc(2, sizeof(char));
   nl[0] = '\n';
@@ -76,13 +84,11 @@ static char *ast_comment_to_string(AST_T *ast) {
 
   if (!ast_comment_is_meaningful(ast) && ast->comment_value != 0) {
     uint32_t len = strlen(ast->comment_value);
-    char* val = (char*)calloc(len + 2, sizeof(char));
+    char *val = (char *)calloc(len + 2, sizeof(char));
     strcat(val, ast->comment_value);
     val[len] = '\n';
     return val;
   }
-
-
 
   char *str = (char *)calloc(1, sizeof(char));
   str[0] = '\0';
@@ -234,14 +240,64 @@ char *ast_to_string(AST_T *ast) {
   }
 }
 
-
-unsigned int ast_comment_is_meaningful(AST_T* comment) {
-  if (!comment) return 0;
+unsigned int ast_comment_is_meaningful(AST_T *comment) {
+  if (!comment)
+    return 0;
   char *comment_value = comment->comment_value;
-  if (!comment_value) return 0;
+  if (!comment_value)
+    return 0;
 
-  if (strlen(comment_value) == 1) return 0;
+  if (strlen(comment_value) == 1)
+    return 0;
 
-  if (comment_value[1] != '%' && comment_value[1] != '!') return 0;
+  if (comment_value[1] != '%' && comment_value[1] != '!')
+    return 0;
   return 1;
+}
+
+const char *ast_get_string_value(AST_T *ast) {
+  if (!ast)
+    return 0;
+
+  if (ast_is_valid_object(ast)) {
+    if (ast->object_vars_size == 1) {
+      AST_T *first = ast->object_vars[0];
+      if (first != 0) {
+        const char *first_str = ast_get_string_value(first);
+        if (first_str)
+          return first_str;
+      }
+    }
+  }
+
+  if (ast->string_value)
+    return ast->string_value;
+  if (ast->var_value != 0 && ast->var_value->string_value)
+    return ast->var_value->string_value;
+  if (ast->var_name != 0)
+    return ast->var_name;
+  return 0;
+}
+
+char ast_get_char(AST_T *ast, int index) {
+  if (!ast)
+    return 0;
+  const char *strval = ast_get_string_value(ast);
+  if (!strval)
+    return 0;
+
+  size_t len = strlen(strval);
+  if (!len)
+    return 0;
+
+  return strval[index % len];
+}
+
+char ast_get_char_lower(AST_T *ast, int index) {
+  if (!ast)
+    return 0;
+  char c = ast_get_char(ast, index);
+  if (!c)
+    return c;
+  return tolower(c);
 }

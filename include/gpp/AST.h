@@ -1,6 +1,7 @@
 #ifndef GPP_AST_H
 #define GPP_AST_H
 #include <stdlib.h>
+#include <stdbool.h>
 
 // forward declaration
 struct VISITOR_STRUCT;
@@ -80,5 +81,13 @@ AST_T *init_ast(int type);
 
 char *ast_to_string(AST_T *ast);
 
-unsigned int ast_comment_is_meaningful(AST_T* ast);
+const char *ast_get_string_value(AST_T *ast);
+
+char ast_get_char(AST_T* ast, int index);
+
+char ast_get_char_lower(AST_T* ast, int index);
+
+unsigned int ast_comment_is_meaningful(AST_T *ast);
+
+bool ast_is_valid_object(AST_T* ast);
 #endif

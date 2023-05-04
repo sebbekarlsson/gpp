@@ -1,0 +1,11 @@
+<html>
+  <head>
+  </head>
+  <body>
+    <div class="columns is-mobile is-multiline">
+      {{ 
+      map (sort(skills), (@<h2>{{ key ($0, 0) }}, {{ value ($0, 0) }}</h2>@))
+      }}    
+    </div>
+  </body>
+</html>

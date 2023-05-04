@@ -1,0 +1,9 @@
+<html>
+    <head>
+    </head>
+    <body>
+       <ul>
+           {{ map (sort(["fruit", "door", "banana", "apple", "car", "elevator"]), (@<li>{{ $0 }}</li>@)) }}
+       </ul>
+    </body>
+</html>

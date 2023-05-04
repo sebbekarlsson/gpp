@@ -1,5 +1,6 @@
 #include <gpp/AST_utils.h>
 #include <gpp/utils.h>
+#include <gpp/macros.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -151,4 +152,19 @@ AST_T *ast_root_push_item(AST_T *ast_root, AST_T *item) {
   }
 
   return ast_root;
+}
+
+int ast_sort_alphabetical(AST_T *ast) {
+  if (!ast) return 0;
+
+  if (ast->type == AST_OBJECT && ast->object_vars_size > 0) {
+    GPP_BUBBLE_SORT(AST_T *, ast->object_vars, ast->object_vars_size,
+                  ast_get_char_lower(a, 0) > ast_get_char_lower(b, 0));
+    return 1;
+  }
+  
+  GPP_BUBBLE_SORT(AST_T *, ast->group_items, ast->group_items_size,
+                  ast_get_char_lower(a, 0) > ast_get_char_lower(b, 0));
+
+  return 1;
 }

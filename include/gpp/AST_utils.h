@@ -11,4 +11,6 @@ AST_T *ast_object_push_var(AST_T *ast_object, AST_T *ast_var);
 AST_T *ast_group_get_value_by_index(AST_T *ast_group, int index);
 AST_T *ast_group_push_item(AST_T *ast_group, AST_T *item);
 AST_T *ast_root_push_item(AST_T *ast_root, AST_T *item);
+
+int ast_sort_alphabetical(AST_T* ast);
 #endif
