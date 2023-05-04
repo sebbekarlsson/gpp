@@ -3,7 +3,7 @@ function (init_gpp_deps TARGET_NAME)
    if (NOT TARGET hashmap_static)
   FetchContent_Declare(
     hashmap_static
-    GIT_REPOSITORY /home/ianertson/workspace/hashmap
+    GIT_REPOSITORY https://github.com/sebbekarlsson/hashmap.git
     GIT_TAG master
     )
   FetchContent_MakeAvailable(hashmap_static)
